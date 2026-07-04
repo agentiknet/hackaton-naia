@@ -1,20 +1,25 @@
+import { randomUUID } from "node:crypto";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { readAudit } from "./audit/log.js";
 import { mastra } from "./mastra/index.js";
-import type { AuditEntry, Verification } from "./mentors/types.js";
+import { mentorJuristeAgent } from "./mastra/agents/mentor-juriste/index.js";
+import { mentorParlementAgent } from "./mastra/agents/mentor-parlement/index.js";
+import type { Profile } from "./mentors/types.js";
+import { extractClaims } from "./pipeline/claims.js";
+import { runPipeline } from "./pipeline/index.js";
+import { verifyClaim } from "./pipeline/verify.js";
 
 const app = new Hono();
 
 interface ChatRequestBody {
   user_id: string;
   message: string;
-  profile: "depute" | "citoyen";
+  profile: Profile;
 }
 
-interface ChatResponseBody {
-  response: string;
-  sources: Verification["sources"];
-  confidence_score: number;
+interface VerifyRequestBody {
+  text: string;
 }
 
 app.get("/health", (c) => {
@@ -23,42 +28,43 @@ app.get("/health", (c) => {
 });
 
 app.post("/api/chat", async (c) => {
-  const _body = await c.req.json<ChatRequestBody>();
+  const body = await c.req.json<ChatRequestBody>();
+  const conversationId = randomUUID();
 
-  const response: ChatResponseBody = {
-    response: "",
-    sources: [],
-    confidence_score: 0,
-  };
+  const result = await runPipeline(body.message, body.profile, conversationId);
 
-  return c.json(response);
-});
-
-app.get("/api/audit/:conversationId", (c) => {
-  const conversationId = c.req.param("conversationId");
-
-  const entry: AuditEntry = {
-    conversationId,
-    claims: [],
-    verifications: [],
-    finalResponse: "",
-    confidenceScore: 0,
-    createdAt: new Date().toISOString(),
-  };
-
-  return c.json(entry);
+  return c.json({
+    conversation_id: result.conversationId,
+    response: result.response,
+    sources: result.sources,
+    confidence_score: result.confidenceScore,
+    status: result.status,
+  });
 });
 
 app.post("/api/verify", async (c) => {
-  const _body = await c.req.json();
+  const body = await c.req.json<VerifyRequestBody>();
+  const claims = await extractClaims(body.text);
 
-  const verification: Partial<Verification> = {
-    verdict: "unknown",
-    score: 0,
-    sources: [],
-  };
+  const verifications = await Promise.all(
+    claims.flatMap((claim) => [
+      verifyClaim(claim, mentorJuristeAgent),
+      verifyClaim(claim, mentorParlementAgent),
+    ]),
+  );
 
-  return c.json(verification);
+  return c.json({ claims, verifications });
+});
+
+app.get("/api/audit/:conversationId", async (c) => {
+  const conversationId = c.req.param("conversationId");
+  const audit = await readAudit(conversationId);
+
+  if (!audit) {
+    return c.json({ error: "conversation not found" }, 404);
+  }
+
+  return c.json(audit);
 });
 
 const port = Number(process.env.PORT ?? 3000);

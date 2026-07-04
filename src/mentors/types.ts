@@ -5,24 +5,20 @@ export interface Claim {
 
 export type Verdict = "supported" | "unsupported" | "unknown";
 
+export type Profile = "depute" | "citoyen";
+
 export interface Source {
-  title: string;
-  url: string;
-  excerpt?: string;
+  label: string;
+  url?: string;
+  ref?: string;
 }
 
 export interface Verification {
   claim: Claim;
-  sources: Source[];
+  mentor: string;
   verdict: Verdict;
-  score: number;
-}
-
-export interface AuditEntry {
-  conversationId: string;
-  claims: Claim[];
-  verifications: Verification[];
-  finalResponse: string;
-  confidenceScore: number;
-  createdAt: string;
+  source?: Source;
+  quote?: string;
+  durationMs: number;
+  error?: string;
 }

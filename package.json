@@ -9,10 +9,13 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --env-file=.env src/server.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "smoke:mcp": "tsx src/scripts/smoke-mcp.ts"
+    "smoke:mcp": "tsx --env-file=.env src/scripts/smoke-mcp.ts",
+    "smoke:claims": "tsx --env-file=.env src/scripts/smoke-claims.ts",
+    "smoke:verify": "tsx --env-file=.env src/scripts/smoke-verify.ts",
+    "smoke:pipeline": "tsx --env-file=.env src/scripts/smoke-pipeline.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.7",

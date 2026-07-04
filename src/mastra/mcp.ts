@@ -1,5 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import type { Tool } from "@mastra/core/tools";
+import { isMockMode, mockMoulineuseTools } from "./mock.js";
 
 const SERVER_NAME = "moulineuse";
 
@@ -44,4 +45,17 @@ export function pickMoulineuseTools(tools: MoulineuseTools, toolNames: string[])
     picked[namespaced] = tool;
   }
   return picked;
+}
+
+/**
+ * Resolves the tools an agent should get for the given unprefixed tool names,
+ * transparently switching to fixture-backed mocks when MOCK_MOULINEUSE=1 so
+ * the demo survives a flaky/unavailable live MCP server.
+ */
+export async function resolveMentorTools(toolNames: string[]): Promise<MoulineuseTools> {
+  if (isMockMode()) {
+    return mockMoulineuseTools(toolNames);
+  }
+  const tools = await listMoulineuseTools();
+  return pickMoulineuseTools(tools, toolNames);
 }
