@@ -11,7 +11,7 @@ export const mentorJuristeAgent = new Agent({
   id: "mentor-juriste",
   name: "mentor-juriste",
   instructions,
-  model: anthropic("claude-haiku-4-5"),
+  model: anthropic("claude-sonnet-5"),
   tools: () =>
     resolveMentorTools([
       "search_recipes",
