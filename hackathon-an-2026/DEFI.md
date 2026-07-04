@@ -73,6 +73,7 @@ Cochez les ressources utilisées en remplaçant `[ ]` par `[x]`.
 
 ### Documents
 - [Vidéo de présentation (narrée)](docs/naia-presentation.mp4)
+- [Vidéo — démo live (pipeline en direct)](docs/naia-demo-live.mp4)
 - [Diapositives de présentation (7 slides)](docs/diapositives.pdf)
 - [Diapositives détaillées (11 slides)](docs/diapositives-detaillees.pdf)
 - [Présentation du défi](docs/naia-defi-presentation.md)
