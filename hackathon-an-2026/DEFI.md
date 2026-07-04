@@ -72,8 +72,9 @@ Cochez les ressources utilisées en remplaçant `[ ]` par `[x]`.
 ![Refus assumé — réponse non certifiée (0/100)](images/image-3.png)
 
 ### Documents
-- [Présentation du défi](docs/naia-defi-presentation.md)
+- [Diapositives de présentation (7 slides)](docs/diapositives.pdf)
 - [Diapositives détaillées (11 slides)](docs/diapositives-detaillees.pdf)
+- [Présentation du défi](docs/naia-defi-presentation.md)
 
 ### URL de démonstration
 https://local-3000.clipgen.co/
