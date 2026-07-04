@@ -1,6 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import type { Tool } from "@mastra/core/tools";
-import { isMockMode, mockMoulineuseTools } from "./mock.js";
+import { isCaptureMode, isMockMode, mockMoulineuseTools, withCapture } from "./mock.js";
 
 const SERVER_NAME = "moulineuse";
 
@@ -50,12 +50,21 @@ export function pickMoulineuseTools(tools: MoulineuseTools, toolNames: string[])
 /**
  * Resolves the tools an agent should get for the given unprefixed tool names,
  * transparently switching to fixture-backed mocks when MOCK_MOULINEUSE=1 so
- * the demo survives a flaky/unavailable live MCP server.
+ * the demo survives a flaky/unavailable live MCP server. When
+ * CAPTURE_MOULINEUSE=1, the live tools are used as normal but each call is
+ * also recorded into fixtures/moulineuse/ for later replay.
  */
 export async function resolveMentorTools(toolNames: string[]): Promise<MoulineuseTools> {
   if (isMockMode()) {
     return mockMoulineuseTools(toolNames);
   }
   const tools = await listMoulineuseTools();
-  return pickMoulineuseTools(tools, toolNames);
+  const picked = pickMoulineuseTools(tools, toolNames);
+  if (isCaptureMode()) {
+    for (const name of toolNames) {
+      const tool = picked[`${SERVER_NAME}_${name}`];
+      if (tool) withCapture(name, tool);
+    }
+  }
+  return picked;
 }

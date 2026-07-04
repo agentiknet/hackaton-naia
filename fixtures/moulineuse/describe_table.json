@@ -1,0 +1,30 @@
+{
+  "0633e7cf3d5fa77d": {
+    "args": {
+      "schema": "legifrance",
+      "table": "article"
+    },
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"table_comment\": null,\n  \"constraints\": [\n    {\n      \"constraint_name\": \"article_pkey\",\n      \"constraint_type\": \"primary_key\",\n      \"columns\": [\n        \"id\"\n      ],\n      \"constraint_definition\": \"PRIMARY KEY (id)\"\n    }\n  ],\n  \"foreign_keys\": [],\n  \"indexes\": [\n    {\n      \"index_name\": \"article_pkey\",\n      \"is_primary\": true,\n      \"is_unique\": true,\n      \"is_valid\": true,\n      \"access_method\": \"btree\",\n      \"indexed_columns\": [\n        \"id\"\n      ],\n      \"included_columns\": [],\n      \"predicate\": null,\n      \"index_definition\": \"CREATE UNIQUE INDEX article_pkey ON legifrance.article USING btree (id)\"\n    },\n    {\n      \"index_name\": \"article_cid_et_num_key\",\n      \"is_primary\": false,\n      \"is_unique\": false,\n      \"is_valid\": true,\n      \"access_method\": \"btree\",\n      \"indexed_columns\": [\n        \"(((data -> 'CONTEXTE'::text) -> 'TEXTE'::text) ->> '@cid'::text)\",\n        \"num\"\n      ],\n      \"included_columns\": [],\n      \"predicate\": null,\n      \"index_definition\": \"CREATE INDEX article_cid_et_num_key ON legifrance.article USING btree (((((data -> 'CONTEXTE'::text) -> 'TEXTE'::text) ->> '@cid'::text)), num)\"\n    }\n  ],\n  \"columns\": [\n    {\n      \"column_name\": \"id\",\n      \"data_type\": \"character\",\n      \"is_nullable\": \"NO\",\n      \"column_default\": null,\n      \"character_maximum_length\": 20,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"data\",\n      \"data_type\": \"jsonb\",\n      \"is_nullable\": \"NO\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"num\",\n      \"data_type\": \"text\",\n      \"is_nullable\": \"YES\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    }\n  ]\n}"
+        }
+      ]
+    }
+  },
+  "dadfb8e06d8eac93": {
+    "args": {
+      "schema": "legifrance",
+      "table": "texte_version"
+    },
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"table_comment\": null,\n  \"constraints\": [\n    {\n      \"constraint_name\": \"texte_version_pkey\",\n      \"constraint_type\": \"primary_key\",\n      \"columns\": [\n        \"id\"\n      ],\n      \"constraint_definition\": \"PRIMARY KEY (id)\"\n    }\n  ],\n  \"foreign_keys\": [],\n  \"indexes\": [\n    {\n      \"index_name\": \"texte_version_pkey\",\n      \"is_primary\": true,\n      \"is_unique\": true,\n      \"is_valid\": true,\n      \"access_method\": \"btree\",\n      \"indexed_columns\": [\n        \"id\"\n      ],\n      \"included_columns\": [],\n      \"predicate\": null,\n      \"index_definition\": \"CREATE UNIQUE INDEX texte_version_pkey ON legifrance.texte_version USING btree (id)\"\n    },\n    {\n      \"index_name\": \"texte_version_nature_et_num_key\",\n      \"is_primary\": false,\n      \"is_unique\": false,\n      \"is_valid\": true,\n      \"access_method\": \"btree\",\n      \"indexed_columns\": [\n        \"nature_et_num\"\n      ],\n      \"included_columns\": [],\n      \"predicate\": null,\n      \"index_definition\": \"CREATE INDEX texte_version_nature_et_num_key ON legifrance.texte_version USING btree (nature_et_num)\"\n    }\n  ],\n  \"columns\": [\n    {\n      \"column_name\": \"id\",\n      \"data_type\": \"character\",\n      \"is_nullable\": \"NO\",\n      \"column_default\": null,\n      \"character_maximum_length\": 20,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"data\",\n      \"data_type\": \"jsonb\",\n      \"is_nullable\": \"NO\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"commission_fond_assemblee_uid\",\n      \"data_type\": \"text\",\n      \"is_nullable\": \"YES\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"est_texte_principal\",\n      \"data_type\": \"boolean\",\n      \"is_nullable\": \"YES\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"nature\",\n      \"data_type\": \"text\",\n      \"is_nullable\": \"YES\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"nature_et_num\",\n      \"data_type\": \"text\",\n      \"is_nullable\": \"YES\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    },\n    {\n      \"column_name\": \"text_search\",\n      \"data_type\": \"tsvector\",\n      \"is_nullable\": \"NO\",\n      \"column_default\": null,\n      \"character_maximum_length\": null,\n      \"column_comment\": null,\n      \"foreign_keys\": []\n    }\n  ]\n}"
+        }
+      ]
+    }
+  }
+}

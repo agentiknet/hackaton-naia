@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Agent } from "@mastra/core/agent";
-import { appendSummary, appendVerifications } from "../audit/log.js";
+import { appendSummary, appendVerifications, readAudit } from "../audit/log.js";
 import { mentorJuristeAgent } from "../mastra/agents/mentor-juriste/index.js";
 import { mentorParlementAgent } from "../mastra/agents/mentor-parlement/index.js";
 import { naiaAgent } from "../mastra/agents/naia/index.js";
@@ -221,11 +223,71 @@ async function verifyDraft(
   return { claims, verifications, summaries, confidenceScore: computeConfidence(summaries) };
 }
 
+const DEMO_FIXTURES_DIR = join(process.cwd(), "fixtures", "demo");
+
+/** Normalizes a question into a stable fixture filename: lowercase, no
+ * accents, non-alphanumeric runs collapsed to a single "-", trimmed. */
+function slugifyQuestion(question: string): string {
+  return question
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function demoFixturePath(question: string): string {
+  return join(DEMO_FIXTURES_DIR, `${slugifyQuestion(question)}.json`);
+}
+
+function isDemoReplayEnabled(): boolean {
+  return process.env.DEMO_REPLAY === "1" || process.env.MOCK_MOULINEUSE === "1";
+}
+
+function isDemoCaptureEnabled(): boolean {
+  return process.env.CAPTURE_DEMO === "1";
+}
+
+function loadDemoFixture(question: string): PipelineResult | undefined {
+  const path = demoFixturePath(question);
+  if (!existsSync(path)) return undefined;
+  return JSON.parse(readFileSync(path, "utf-8")) as PipelineResult;
+}
+
+function saveDemoFixture(question: string, result: PipelineResult): void {
+  mkdirSync(DEMO_FIXTURES_DIR, { recursive: true });
+  writeFileSync(demoFixturePath(question), JSON.stringify(result, null, 2), "utf-8");
+}
+
+/** Replaying a fixture must still leave a readable audit trail behind its own
+ * (fixed) conversationId — but only write it once, so replaying the same
+ * fixture repeatedly doesn't pile up duplicate verification lines. */
+async function ensureDemoAudit(question: string, profile: Profile, fixture: PipelineResult): Promise<void> {
+  if (await readAudit(fixture.conversationId)) return;
+  await appendVerifications(fixture.conversationId, 1, fixture.verifications);
+  await appendSummary(fixture.conversationId, {
+    question,
+    profile,
+    status: fixture.status,
+    confidenceScore: fixture.confidenceScore,
+    response: fixture.response,
+  });
+}
+
 export async function runPipeline(
   question: string,
   profile: Profile,
   conversationId: string = randomUUID(),
 ): Promise<PipelineResult> {
+  if (isDemoReplayEnabled()) {
+    const fixture = loadDemoFixture(question);
+    if (fixture) {
+      await ensureDemoAudit(question, profile, fixture);
+      return fixture;
+    }
+  }
+
   const threshold = confidenceThreshold();
 
   const draftResult = await naiaAgent.generate(buildNaiaPrompt(question, profile), { maxSteps: NAIA_MAX_STEPS });
@@ -249,5 +311,11 @@ export async function runPipeline(
 
   await appendSummary(conversationId, { question, profile, status, confidenceScore, response });
 
-  return { conversationId, response, sources, confidenceScore, status, claims, verifications };
+  const result: PipelineResult = { conversationId, response, sources, confidenceScore, status, claims, verifications };
+
+  if (isDemoCaptureEnabled() && status === "answered") {
+    saveDemoFixture(question, result);
+  }
+
+  return result;
 }
