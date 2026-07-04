@@ -18,35 +18,72 @@
     "Contrôler la recevabilité financière (article 40) : la mesure semble sans charge nouvelle mais l'exposé doit l'expliciter."
   ],
   "claims": [
-    { "id": "c1", "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012." },
-    { "id": "c2", "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030." }
+    {
+      "id": "c1",
+      "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012."
+    },
+    {
+      "id": "c2",
+      "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030."
+    }
   ],
   "verifications": [
     {
-      "claim": { "id": "c1", "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012." },
+      "claim": {
+        "id": "c1",
+        "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012."
+      },
       "mentor": "mentor-juriste",
       "verdict": "supported",
-      "source": { "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)", "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642", "ref": "LEGIARTI000047717642" },
+      "source": {
+        "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)",
+        "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642",
+        "ref": "LEGIARTI000047717642"
+      },
       "durationMs": 8200
     },
     {
-      "claim": { "id": "c1", "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012." },
+      "claim": {
+        "id": "c1",
+        "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012."
+      },
       "mentor": "mentor-parlement",
       "verdict": "unknown",
       "durationMs": 1300
     },
     {
-      "claim": { "id": "c2", "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030." },
+      "claim": {
+        "id": "c2",
+        "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030."
+      },
       "mentor": "mentor-juriste",
       "verdict": "supported",
-      "source": { "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)", "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642", "ref": "LEGIARTI000047717642" },
+      "source": {
+        "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)",
+        "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642",
+        "ref": "LEGIARTI000047717642"
+      },
       "durationMs": 7600
     },
     {
-      "claim": { "id": "c2", "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030." },
+      "claim": {
+        "id": "c2",
+        "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030."
+      },
       "mentor": "mentor-parlement",
       "verdict": "unknown",
       "durationMs": 1100
     }
+  ],
+  "matchKeywords": [
+    "l. 100-4",
+    "l.100-4",
+    "l 100-4",
+    "consommation d'energie",
+    "consommation d'énergie",
+    "energie finale",
+    "énergie finale",
+    "reduction de la consommation",
+    "réduction de la consommation"
   ]
 }

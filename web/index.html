@@ -994,6 +994,12 @@
         <div class="chat-empty">
           <div class="chat-empty-icon">📜</div>
           <p>Décrivez l'intention d'un article ou d'un amendement.<br>Naia en propose une rédaction, sourcée et vérifiée par le Conseil.</p>
+          <div class="suggest-chips">
+            <button class="suggest-chip draft-chip" data-intent="Renforcer l'objectif de réduction de la consommation d'énergie finale à l'horizon 2035 en modifiant l'article L. 100-4 du code de l'énergie.">Renforcer l'objectif énergétique 2035 (art. L. 100-4)</button>
+            <button class="suggest-chip draft-chip" data-intent="Prolonger l'expérimentation de l'encadrement des loyers prévue à l'article 140 de la loi ELAN et rouvrir les candidatures des EPCI volontaires.">Prolonger l'encadrement des loyers (art. 140 ELAN)</button>
+            <button class="suggest-chip draft-chip" data-intent="Garantir un délai maximal d'accès à la sédation profonde et continue prévue à l'article L. 1110-5-2 du code de la santé publique.">Garantir l'accès à la sédation profonde (art. L. 1110-5-2 CSP)</button>
+            <button class="suggest-chip draft-chip" data-intent="Renforcer l'obligation d'équipement des parkings en ombrières photovoltaïques prévue par l'article 40 de la loi APER.">Étendre la solarisation des parkings (art. 40 loi APER)</button>
+          </div>
         </div>
       </div>
     </section>
@@ -1077,11 +1083,16 @@ function updateDemoBadge() {
   badge.classList.toggle('visible', showBadge);
 }
 
-/* ─── Suggested questions ─── */
+/* ─── Suggested questions / intents ─── */
 document.querySelectorAll('.suggest-chip').forEach(chip => {
   chip.addEventListener('click', () => {
-    document.getElementById('chatInput').value = chip.textContent.trim();
-    sendMessage();
+    if (chip.classList.contains('draft-chip')) {
+      document.getElementById('draftIntent').value = chip.dataset.intent || chip.textContent.trim();
+      submitDraft();
+    } else {
+      document.getElementById('chatInput').value = chip.textContent.trim();
+      sendMessage();
+    }
   });
 });
 

@@ -1,0 +1,119 @@
+{
+  "conversationId": "demo-draft-delai-acces-sedation-profonde-l1110-5-2",
+  "intent": "Garantir un délai maximal d'accès à la sédation profonde et continue prévue à l'article L. 1110-5-2 du code de la santé publique.",
+  "matchKeywords": [
+    "sedation profonde",
+    "sédation profonde",
+    "fin de vie",
+    "l. 1110-5-2",
+    "l1110-5-2",
+    "aide a mourir",
+    "aide à mourir"
+  ],
+  "draft": "## Dispositif\n\n**Article 1er**\n\nL'article L. 1110-5-2 du code de la santé publique est complété par un alinéa ainsi rédigé :\n\n« Lorsque les conditions prévues au présent article sont remplies, la sédation profonde et continue est mise en œuvre dans un délai qui ne peut excéder quinze jours à compter de la demande du patient. En cas d'impossibilité, l'équipe médicale en informe le patient et organise sans délai son orientation vers un établissement ou un service en mesure de la mettre en œuvre. »\n\n## Exposé sommaire\n\nL'article L. 1110-5-2 du code de la santé publique, créé par la loi n° 2016-87 du 2 février 2016 (dite Claeys-Leonetti), ouvre un droit, sous conditions strictes, à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès.\n\nLes travaux d'évaluation de la loi ont mis en évidence une application très inégale de ce droit selon les territoires. Le présent amendement inscrit dans la loi un délai maximal de mise en œuvre et une obligation d'orientation, afin de garantir l'effectivité du droit existant sans en modifier les conditions d'accès.",
+  "sources": [
+    {
+      "label": "Article L. 1110-5-2 du code de la santé publique (loi n° 2016-87)",
+      "ref": "JORFTEXT000031970253",
+      "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253"
+    }
+  ],
+  "confidenceScore": 79,
+  "status": "answered",
+  "suggestions": [
+    "Un délai impératif de quinze jours crée une obligation de résultat pour les établissements : sécuriser le dispositif par un renvoi aux moyens (décret d'application) pour prévenir un risque de censure pour incompétence négative.",
+    "Articuler le nouveau délai avec la procédure collégiale préalable prévue au même article, dont la durée n'est pas encadrée.",
+    "Préciser le point de départ du délai (demande formalisée du patient ou décision issue de la procédure collégiale)."
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "L'article L. 1110-5-2 du code de la santé publique a été créé par la loi n° 2016-87 du 2 février 2016."
+    },
+    {
+      "id": "c2",
+      "text": "L'article L. 1110-5-2 ouvre un droit, sous conditions, à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès."
+    },
+    {
+      "id": "c3",
+      "text": "L'article L. 1110-5-2, dans sa rédaction en vigueur, ne fixe aucun délai maximal de mise en œuvre de la sédation profonde et continue."
+    }
+  ],
+  "verifications": [
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'article L. 1110-5-2 du code de la santé publique a été créé par la loi n° 2016-87 du 2 février 2016."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Article L. 1110-5-2 du code de la santé publique (loi n° 2016-87)",
+        "ref": "JORFTEXT000031970253",
+        "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253"
+      },
+      "quote": "Loi n° 2016-87 du 2 février 2016 créant de nouveaux droits en faveur des malades et des personnes en fin de vie — art. 3 (art. L. 1110-5-2 nouveau).",
+      "durationMs": 4800
+    },
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'article L. 1110-5-2 du code de la santé publique a été créé par la loi n° 2016-87 du 2 février 2016."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1500
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "L'article L. 1110-5-2 ouvre un droit, sous conditions, à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Article L. 1110-5-2 du code de la santé publique (loi n° 2016-87)",
+        "ref": "JORFTEXT000031970253",
+        "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253"
+      },
+      "quote": "« À la demande du patient d'éviter toute souffrance et de ne pas subir d'obstination déraisonnable, une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès […] »",
+      "durationMs": 5600
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "L'article L. 1110-5-2 ouvre un droit, sous conditions, à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1637
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "L'article L. 1110-5-2, dans sa rédaction en vigueur, ne fixe aucun délai maximal de mise en œuvre de la sédation profonde et continue."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Article L. 1110-5-2 du code de la santé publique (loi n° 2016-87)",
+        "ref": "JORFTEXT000031970253",
+        "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253"
+      },
+      "quote": "Aucune disposition de l'article ne prévoit de délai de mise en œuvre.",
+      "durationMs": 6300
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "L'article L. 1110-5-2, dans sa rédaction en vigueur, ne fixe aucun délai maximal de mise en œuvre de la sédation profonde et continue."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1774
+    }
+  ]
+}

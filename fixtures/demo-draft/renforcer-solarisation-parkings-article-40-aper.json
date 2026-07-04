@@ -1,0 +1,120 @@
+{
+  "conversationId": "demo-draft-renforcer-solarisation-parkings-article-40-aper",
+  "intent": "Renforcer l'obligation d'équipement des parkings en ombrières photovoltaïques prévue par l'article 40 de la loi APER.",
+  "matchKeywords": [
+    "ombrieres",
+    "ombrières",
+    "parkings",
+    "solarisation",
+    "article 40",
+    "aper",
+    "photovoltaique",
+    "photovoltaïque"
+  ],
+  "draft": "## Dispositif\n\n**Article 1er**\n\nL'article 40 de la loi n° 2023-175 du 10 mars 2023 relative à l'accélération de la production d'énergies renouvelables est ainsi modifié :\n\n1° Au premier alinéa du I, les mots « d'une superficie supérieure à 1 500 mètres carrés » sont remplacés par les mots « d'une superficie supérieure à 1 000 mètres carrés » ;\n\n2° Le I est complété par un alinéa ainsi rédigé :\n\n« Les gestionnaires des parcs de stationnement mentionnés au premier alinéa transmettent chaque année au représentant de l'État dans le département un état d'avancement de leurs travaux d'équipement. »\n\n## Exposé sommaire\n\nL'article 40 de la loi n° 2023-175 du 10 mars 2023 (dite loi APER) impose l'équipement en ombrières photovoltaïques des parcs de stationnement extérieurs existants d'une superficie supérieure à 1 500 m², sur la moitié au moins de leur superficie.\n\nLe présent amendement abaisse le seuil d'assujettissement à 1 000 m² et crée une obligation déclarative annuelle de suivi, afin d'accélérer la solarisation des surfaces déjà artificialisées, conformément à l'objet de la loi.",
+  "sources": [
+    {
+      "label": "Loi n° 2023-175 du 10 mars 2023 (APER), article 40",
+      "ref": "JORFTEXT000047294244",
+      "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047294244"
+    }
+  ],
+  "confidenceScore": 80,
+  "status": "answered",
+  "suggestions": [
+    "L'abaissement du seuil à 1 000 m² élargit substantiellement le champ des assujettis : documenter l'étude d'impact (nombre de parcs concernés, coût) pour prévenir l'irrecevabilité financière au titre de l'article 40 de la Constitution — à écarter s'il s'agit d'une charge pour des personnes privées.",
+    "Harmoniser les échéances d'entrée en vigueur avec celles déjà prévues par l'article 40 de la loi APER (calendrier différencié selon la taille des parcs).",
+    "L'obligation déclarative annuelle relève potentiellement du domaine réglementaire : envisager un renvoi au décret."
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "L'article 40 de la loi n° 2023-175 du 10 mars 2023 impose l'équipement en ombrières photovoltaïques des parcs de stationnement extérieurs de plus de 1 500 m²."
+    },
+    {
+      "id": "c2",
+      "text": "L'obligation d'ombrières prévue à l'article 40 porte sur la moitié au moins de la superficie du parc de stationnement."
+    },
+    {
+      "id": "c3",
+      "text": "La loi n° 2023-175 du 10 mars 2023 est relative à l'accélération de la production d'énergies renouvelables."
+    }
+  ],
+  "verifications": [
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'article 40 de la loi n° 2023-175 du 10 mars 2023 impose l'équipement en ombrières photovoltaïques des parcs de stationnement extérieurs de plus de 1 500 m²."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2023-175 du 10 mars 2023 (APER), article 40",
+        "ref": "JORFTEXT000047294244",
+        "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047294244"
+      },
+      "quote": "Art. 40, I : les parcs de stationnement extérieurs d'une superficie supérieure à 1 500 mètres carrés sont équipés, sur au moins la moitié de cette superficie, d'ombrières intégrant un procédé de production d'énergies renouvelables.",
+      "durationMs": 5100
+    },
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'article 40 de la loi n° 2023-175 du 10 mars 2023 impose l'équipement en ombrières photovoltaïques des parcs de stationnement extérieurs de plus de 1 500 m²."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1500
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "L'obligation d'ombrières prévue à l'article 40 porte sur la moitié au moins de la superficie du parc de stationnement."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2023-175 du 10 mars 2023 (APER), article 40",
+        "ref": "JORFTEXT000047294244",
+        "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047294244"
+      },
+      "quote": "« sur au moins la moitié de cette superficie »",
+      "durationMs": 4300
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "L'obligation d'ombrières prévue à l'article 40 porte sur la moitié au moins de la superficie du parc de stationnement."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1637
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "La loi n° 2023-175 du 10 mars 2023 est relative à l'accélération de la production d'énergies renouvelables."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2023-175 du 10 mars 2023 (APER), article 40",
+        "ref": "JORFTEXT000047294244",
+        "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047294244"
+      },
+      "quote": "LOI n° 2023-175 du 10 mars 2023 relative à l'accélération de la production d'énergies renouvelables.",
+      "durationMs": 3900
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "La loi n° 2023-175 du 10 mars 2023 est relative à l'accélération de la production d'énergies renouvelables."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1774
+    }
+  ]
+}

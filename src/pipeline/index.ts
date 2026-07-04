@@ -649,18 +649,26 @@ function draftFixturePath(intent: string): string {
   return join(DRAFT_FIXTURES_DIR, `${slugifyQuestion(intent)}.json`);
 }
 
-/** Load the fixture for this exact intent; failing that (phrasing/apostrophe
- * variance), fall back to the single canonical drafting fixture on disk. The
- * drafting demo has one scenario, so any reasonable phrasing should replay it
- * deterministically rather than fall through to an unstable live call. */
-function loadDraftFixture(intent: string): DraftResult | undefined {
+type DraftFixture = DraftResult & { matchKeywords?: string[] };
+
+/** Load the fixture for this exact intent; failing that, match on the
+ * fixtures' `matchKeywords` (accent-insensitive substring, same contract as
+ * the chat fixtures); failing that, fall back to the first fixture on disk so
+ * a free-typed intent still replays a deterministic scenario in demo mode. */
+function loadDraftFixture(intent: string): DraftFixture | undefined {
   const exact = draftFixturePath(intent);
-  if (existsSync(exact)) return JSON.parse(readFileSync(exact, "utf-8")) as DraftResult;
+  if (existsSync(exact)) return JSON.parse(readFileSync(exact, "utf-8")) as DraftFixture;
 
   if (!existsSync(DRAFT_FIXTURES_DIR)) return undefined;
-  const [first] = readdirSync(DRAFT_FIXTURES_DIR).filter((f) => f.endsWith(".json")).sort();
-  if (!first) return undefined;
-  return JSON.parse(readFileSync(join(DRAFT_FIXTURES_DIR, first), "utf-8")) as DraftResult;
+  const files = readdirSync(DRAFT_FIXTURES_DIR).filter((f) => f.endsWith(".json")).sort();
+  if (files.length === 0) return undefined;
+  const parsed = files.map((f) => JSON.parse(readFileSync(join(DRAFT_FIXTURES_DIR, f), "utf-8")) as DraftFixture);
+
+  const folded = foldText(intent);
+  for (const fixture of parsed) {
+    if (fixture.matchKeywords?.some((kw) => folded.includes(foldText(kw)))) return fixture;
+  }
+  return parsed[0];
 }
 
 function saveDraftFixture(intent: string, result: DraftResult): void {
@@ -881,6 +889,33 @@ export async function runDraftStreaming(
   conversationId: string,
   emit: StreamEmit,
 ): Promise<DraftResult> {
+  // Demo replay: pace the fixture into watchable stages, exactly like the
+  // chat's streamReplay — the drafting demo must feel like the live pipeline.
+  if (isDemoReplayEnabled() && !isDemoCaptureEnabled()) {
+    const fixture = loadDraftFixture(intent);
+    if (fixture) {
+      await emit({ type: "stage", key: "draft", label: "Naia rédige le dispositif et l'exposé sommaire…" });
+      await streamSleep(900);
+      const verifs = fixture.verifications ?? [];
+      const claimCount = fixture.claims?.length ?? new Set(verifs.map((v) => v.claim.id)).size;
+      await emit({ type: "stage", key: "extract", label: "Extraction des références à vérifier", count: claimCount });
+      await streamSleep(500);
+      await emit({ type: "stage", key: "verify", label: "Le Conseil des Mentors vérifie chaque référence" });
+      for (const v of verifs) {
+        await streamSleep(300);
+        await emit({ type: "verification", verification: v });
+      }
+      await streamSleep(400);
+      await emit({ type: "stage", key: "suggest", label: "Le Conseil formule ses suggestions légistiques…" });
+      await streamSleep(600);
+      await emit({ type: "stage", key: "certify", label: "Arbitrage et certification…" });
+      await streamSleep(400);
+      const result = await runDraft(intent, baseText, conversationId); // returns the fixture + writes the audit trail
+      await emit({ type: "done", result });
+      return result;
+    }
+  }
+
   await emit({ type: "stage", key: "draft", label: "Naia rédige le dispositif et l'exposé sommaire…" });
   const result = await runDraft(intent, baseText, conversationId, emit);
   await emit({ type: "stage", key: "certify", label: "Arbitrage et certification…" });

@@ -1,0 +1,121 @@
+{
+  "conversationId": "demo-draft-prolonger-encadrement-loyers-article-140-elan",
+  "intent": "Prolonger l'expérimentation de l'encadrement des loyers prévue à l'article 140 de la loi ELAN et rouvrir les candidatures des EPCI volontaires.",
+  "matchKeywords": [
+    "encadrement des loyers",
+    "article 140",
+    "loi elan",
+    "loyers"
+  ],
+  "draft": "## Dispositif\n\n**Article 1er**\n\nL'article 140 de la loi n° 2018-1021 du 23 novembre 2018 portant évolution du logement, de l'aménagement et du numérique est ainsi modifié :\n\n1° Au premier alinéa du I, les mots « pour une durée de huit ans » sont remplacés par les mots « pour une durée de treize ans » ;\n\n2° Après le premier alinéa du I, il est inséré un alinéa ainsi rédigé :\n\n« Un décret en Conseil d'État fixe les conditions dans lesquelles les établissements publics de coopération intercommunale mentionnés au premier alinéa peuvent, jusqu'au terme de l'expérimentation, déposer une nouvelle demande d'application du dispositif. »\n\n## Exposé sommaire\n\nL'article 140 de la loi n° 2018-1021 du 23 novembre 2018 (dite loi ELAN) a instauré, à titre expérimental et sur candidature des EPCI ou communes situés en zone tendue, un dispositif d'encadrement du niveau des loyers. La durée de l'expérimentation, initialement fixée à cinq ans, a été portée à huit ans par la loi n° 2022-217 du 21 février 2022 (dite loi 3DS).\n\nLe présent amendement prolonge l'expérimentation de cinq années supplémentaires et rouvre la faculté de candidater pour les territoires volontaires, afin de permettre une évaluation complète du dispositif sur un cycle locatif entier. Le loyer de référence demeure fixé selon les modalités de l'article 17 de la loi n° 89-462 du 6 juillet 1989, qui reste inchangé.",
+  "sources": [
+    {
+      "label": "Loi n° 2018-1021 du 23 novembre 2018 (ELAN), article 140",
+      "ref": "LEGITEXT000037642121",
+      "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000037642121"
+    },
+    {
+      "label": "Loi n° 89-462 du 6 juillet 1989 (art. 17)",
+      "ref": "LEGITEXT000006069108",
+      "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000006069108"
+    }
+  ],
+  "confidenceScore": 77,
+  "status": "answered",
+  "suggestions": [
+    "Vérifier la compatibilité de la prolongation avec l'exigence constitutionnelle de limitation dans le temps des expérimentations (article 37-1 de la Constitution) : treize ans au total pourrait fragiliser la qualification d'« expérimentation ».",
+    "Prévoir une clause d'évaluation intermédiaire (rapport au Parlement) pour documenter les effets du dispositif avant le nouveau terme.",
+    "La réouverture des candidatures par décret en Conseil d'État suppose de préciser les critères d'éligibilité directement dans la loi pour limiter le risque d'incompétence négative."
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "L'article 140 de la loi n° 2018-1021 du 23 novembre 2018 a instauré un encadrement des loyers à titre expérimental, activé sur candidature des EPCI ou communes en zone tendue."
+    },
+    {
+      "id": "c2",
+      "text": "La durée de l'expérimentation de l'encadrement des loyers, initialement fixée à cinq ans, a été portée à huit ans par la loi n° 2022-217 du 21 février 2022."
+    },
+    {
+      "id": "c3",
+      "text": "Le loyer de référence applicable en zone tendue est fixé selon les modalités de l'article 17 de la loi n° 89-462 du 6 juillet 1989."
+    }
+  ],
+  "verifications": [
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'article 140 de la loi n° 2018-1021 du 23 novembre 2018 a instauré un encadrement des loyers à titre expérimental, activé sur candidature des EPCI ou communes en zone tendue."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2018-1021 du 23 novembre 2018 (ELAN), article 140",
+        "ref": "LEGITEXT000037642121",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000037642121"
+      },
+      "quote": "À titre expérimental […] dans les zones [tendues], l'encadrement du niveau des loyers s'applique sur le territoire des EPCI qui en font la demande.",
+      "durationMs": 5200
+    },
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'article 140 de la loi n° 2018-1021 du 23 novembre 2018 a instauré un encadrement des loyers à titre expérimental, activé sur candidature des EPCI ou communes en zone tendue."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1500
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "La durée de l'expérimentation de l'encadrement des loyers, initialement fixée à cinq ans, a été portée à huit ans par la loi n° 2022-217 du 21 février 2022."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2018-1021 du 23 novembre 2018 (ELAN), article 140",
+        "ref": "LEGITEXT000037642121",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000037642121"
+      },
+      "quote": "La durée de l'expérimentation prévue à l'article 140 a été portée à huit ans par l'article 85 de la loi n° 2022-217.",
+      "durationMs": 6100
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "La durée de l'expérimentation de l'encadrement des loyers, initialement fixée à cinq ans, a été portée à huit ans par la loi n° 2022-217 du 21 février 2022."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1637
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "Le loyer de référence applicable en zone tendue est fixé selon les modalités de l'article 17 de la loi n° 89-462 du 6 juillet 1989."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 89-462 du 6 juillet 1989 (art. 17)",
+        "ref": "LEGITEXT000006069108",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000006069108"
+      },
+      "quote": "Art. 17 : le représentant de l'État dans le département fixe chaque année, par arrêté, un loyer de référence, un loyer de référence majoré et un loyer de référence minoré.",
+      "durationMs": 4400
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "Le loyer de référence applicable en zone tendue est fixé selon les modalités de l'article 17 de la loi n° 89-462 du 6 juillet 1989."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "quote": "Hors du domaine de vérification du mentor Parlement (texte de loi / article de code).",
+      "durationMs": 1774
+    }
+  ]
+}
