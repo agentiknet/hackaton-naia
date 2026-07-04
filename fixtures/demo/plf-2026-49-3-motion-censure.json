@@ -202,5 +202,38 @@
       "quote": "Résultats des deux scrutins du 02/02/2026 : 260 voix et 135 voix, tous deux inférieurs à la majorité absolue de 289 voix requise pour l'adoption d'une motion de censure.",
       "durationMs": 7300
     }
+  ],
+  "timelineTitle": "Loi de finances pour 2026 (n° 2026-103)",
+  "timeline": [
+    {
+      "label": "49.3 — 1re partie",
+      "date": "20 janv. 2026",
+      "status": "done"
+    },
+    {
+      "label": "49.3 — ensemble du texte",
+      "date": "23 janv. 2026",
+      "status": "done"
+    },
+    {
+      "label": "49.3 — lecture définitive",
+      "date": "30 janv. 2026",
+      "status": "done"
+    },
+    {
+      "label": "Motions de censure rejetées",
+      "date": "2 févr. 2026",
+      "status": "done"
+    },
+    {
+      "label": "Conseil constitutionnel",
+      "date": "19 févr. 2026",
+      "status": "done"
+    },
+    {
+      "label": "Promulgation / JO",
+      "date": "19-20 févr. 2026",
+      "status": "current"
+    }
   ]
 }

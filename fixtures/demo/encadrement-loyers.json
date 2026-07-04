@@ -184,5 +184,38 @@
       "quote": "Cette claim porte sur une proposition de loi en cours de navette, non encore un texte en vigueur consultable sur Légifrance. Le domaine de compétence du mentor Juriste se limite aux textes de loi et articles de code en vigueur.",
       "durationMs": 2000
     }
+  ],
+  "timelineTitle": "Loi n° 2018-1021 (ELAN) — encadrement des loyers",
+  "timeline": [
+    {
+      "label": "Dépôt (AN)",
+      "date": "4 avr. 2018",
+      "status": "done"
+    },
+    {
+      "label": "CMP (accord)",
+      "date": "19 sept. 2018",
+      "status": "done"
+    },
+    {
+      "label": "Adoption définitive AN",
+      "date": "3 oct. 2018",
+      "status": "done"
+    },
+    {
+      "label": "Adoption définitive Sénat",
+      "date": "16 oct. 2018",
+      "status": "done"
+    },
+    {
+      "label": "Conseil constitutionnel",
+      "date": "15 nov. 2018",
+      "status": "done"
+    },
+    {
+      "label": "Promulgation / JO",
+      "date": "23-24 nov. 2018",
+      "status": "current"
+    }
   ]
 }
