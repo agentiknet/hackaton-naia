@@ -7,7 +7,7 @@ Naia : l'IA parlementaire qui ne répond que ce qu'elle peut prouver
 Les IA répondent toujours — même quand elles ne savent pas. En droit, une hallucination devient une désinformation citoyenne, ou l'erreur d'un élu. Naia ne délivre une réponse que si elle est sourcée sur les textes officiels (Légifrance, données de l'Assemblée et du Sénat). Avant tout envoi, un Conseil des Mentors vérifie chaque affirmation. Trois issues : certifiée, insuffisante, ou refusée — jamais une quatrième où elle invente.
 
 ### Porteur
-Fabrikapp <!-- à confirmer : nom d'équipe/porteur -->
+Fabrikapp
 
 ### Description longue
 
@@ -32,7 +32,7 @@ Fabrikapp <!-- à confirmer : nom d'équipe/porteur -->
 ![Image principale](images/cover.png)
 
 ### Contributeurs
-- Jeremy <!-- compléter : prénom nom, + autres membres -->
+- Jeremy
 
 ### Ressources utilisées
 Cochez les ressources utilisées en remplaçant `[ ]` par `[x]`.
@@ -66,15 +66,16 @@ Cochez les ressources utilisées en remplaçant `[ ]` par `[x]`.
 - [ ] `legiwatch-serveur-mcp-parlement` — Serveur MCP Parlement ✺ LegiWatch
 
 ### Galerie
-- [Comprendre la loi — réponse citoyenne certifiée sur les textes officiels](images/image-1.png)
-- [Rédiger la loi — amendement et exposé sommaire certifiés, suggestions du Conseil](images/image-2.png)
-- [Refus assumé — réponse non certifiée (0/100)](images/image-3.png)
+![Comprendre la loi — réponse citoyenne certifiée sur les textes officiels](images/image-1.png)
+![Rédiger la loi — amendement et exposé sommaire certifiés, suggestions du Conseil](images/image-2.png)
+![Refus assumé — réponse non certifiée (0/100)](images/image-3.png)
 
 ### Documents
 - [Présentation du défi](docs/naia-defi-presentation.md)
+- [Diapositives détaillées (11 slides)](docs/diapositives-detaillees.pdf)
 
 ### URL de démonstration
-<!-- pas d'URL publique — démo locale ; renseigner si déploiement -->
+https://local-3000.clipgen.co/
 
 ### Diapositives de présentation
 [Diapositives de présentation](docs/diapositives.pdf)
