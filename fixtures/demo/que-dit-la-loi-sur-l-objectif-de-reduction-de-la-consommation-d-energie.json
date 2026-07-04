@@ -174,5 +174,38 @@
       "quote": "La claim porte sur le contenu d'un article spécifique du code de l'énergie (L. 100-4) et ses obligations légales. Cela relève de la vérification de textes de loi et de codes, pas du suivi de dossiers législatifs, amendements ou scrutins parlementaires.",
       "durationMs": 2262
     }
+  ],
+  "timelineTitle": "Loi n° 2023-175 — accélération des énergies renouvelables",
+  "timeline": [
+    {
+      "label": "Dépôt (Sénat)",
+      "date": "26 sept. 2022",
+      "status": "done"
+    },
+    {
+      "label": "1re lecture Sénat",
+      "date": "4 nov. 2022",
+      "status": "done"
+    },
+    {
+      "label": "1re lecture AN",
+      "date": "10 janv. 2023",
+      "status": "done"
+    },
+    {
+      "label": "CMP (accord)",
+      "date": "24 janv. 2023",
+      "status": "done"
+    },
+    {
+      "label": "Conseil constitutionnel",
+      "date": "9 mars 2023",
+      "status": "done"
+    },
+    {
+      "label": "Promulgation / JO",
+      "date": "10-11 mars 2023",
+      "status": "current"
+    }
   ]
 }
