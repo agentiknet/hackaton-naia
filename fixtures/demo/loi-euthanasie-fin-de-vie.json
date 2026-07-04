@@ -1,0 +1,113 @@
+{
+  "conversationId": "demo-eutha-6b3f9d21-4a7c-4e02-9f14-2c8ab5d7e330",
+  "matchKeywords": [
+    "euthanasie",
+    "fin de vie",
+    "aide a mourir",
+    "aide à mourir",
+    "suicide assiste",
+    "suicide assisté",
+    "sedation profonde",
+    "sédation profonde",
+    "claeys",
+    "leonetti",
+    "directives anticipees",
+    "directives anticipées",
+    "mourir dignement"
+  ],
+  "response": "## L'euthanasie n'est pas légale en France\n\nEn l'état du droit, **l'euthanasie et le suicide assisté ne sont pas autorisés** en France.\n\nLe cadre applicable est la **loi n° 2016-87 du 2 février 2016, dite « Claeys-Leonetti »**, qui a créé de nouveaux droits en faveur des personnes malades et en fin de vie :\n\n- un droit, sous conditions strictes, à une **sédation profonde et continue** provoquant une altération de la conscience maintenue jusqu'au décès (article L. 1110-5-2 du code de la santé publique) ;\n- des **directives anticipées** qui s'imposent au médecin, sauf urgence vitale le temps d'évaluer la situation ou lorsqu'elles apparaissent manifestement inappropriées (article L. 1111-11) ;\n- l'interdiction de l'**obstination déraisonnable**.\n\nUn **projet de loi relatif à l'accompagnement des malades et de la fin de vie** (« aide à mourir ») a par ailleurs été débattu à l'Assemblée nationale ; son parcours législatif reste en évolution, et je ne le certifie donc pas dans cette réponse.\n\n*Sources : loi n° 2016-87 du 2 février 2016 (Légifrance) ; dossier d'évaluation de la loi Claeys-Leonetti (Assemblée nationale).*",
+  "sources": [
+    {
+      "label": "Loi n° 2016-87 du 2 février 2016 (dite Claeys-Leonetti)",
+      "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253",
+      "ref": "JORFTEXT000031970253"
+    },
+    {
+      "label": "Article L. 1110-5-2 du code de la santé publique (sédation profonde et continue)",
+      "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253",
+      "ref": "art. L. 1110-5-2 CSP"
+    },
+    {
+      "label": "Dossier « Évaluation de la loi Claeys-Leonetti » (Assemblée nationale)",
+      "url": "https://www.tricoteuses.fr/assemblee/dossiers_legislatifs/DLR5L16N46764",
+      "ref": "DLR5L16N46764"
+    }
+  ],
+  "confidenceScore": 76,
+  "status": "answered",
+  "claims": [
+    { "id": "c1", "text": "En droit français en vigueur, l'euthanasie et le suicide assisté ne sont pas autorisés." },
+    { "id": "c2", "text": "La loi n° 2016-87 du 2 février 2016, dite Claeys-Leonetti, a créé de nouveaux droits en faveur des malades et des personnes en fin de vie." },
+    { "id": "c3", "text": "Cette loi a instauré, sous conditions, un droit à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès (article L. 1110-5-2 du code de la santé publique)." },
+    { "id": "c4", "text": "Les directives anticipées s'imposent au médecin, sauf urgence vitale ou lorsqu'elles apparaissent manifestement inappropriées (article L. 1111-11 du code de la santé publique)." },
+    { "id": "c5", "text": "Un projet de loi relatif à l'accompagnement des malades et de la fin de vie (« aide à mourir ») a été débattu à l'Assemblée nationale." }
+  ],
+  "verifications": [
+    {
+      "claim": { "id": "c1", "text": "En droit français en vigueur, l'euthanasie et le suicide assisté ne sont pas autorisés." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Loi n° 2016-87 du 2 février 2016 (dite Claeys-Leonetti)", "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253", "ref": "JORFTEXT000031970253" },
+      "durationMs": 7400
+    },
+    {
+      "claim": { "id": "c1", "text": "En droit français en vigueur, l'euthanasie et le suicide assisté ne sont pas autorisés." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1600
+    },
+    {
+      "claim": { "id": "c2", "text": "La loi n° 2016-87 du 2 février 2016, dite Claeys-Leonetti, a créé de nouveaux droits en faveur des malades et des personnes en fin de vie." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Loi n° 2016-87 du 2 février 2016 (dite Claeys-Leonetti)", "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253", "ref": "JORFTEXT000031970253" },
+      "durationMs": 6800
+    },
+    {
+      "claim": { "id": "c2", "text": "La loi n° 2016-87 du 2 février 2016, dite Claeys-Leonetti, a créé de nouveaux droits en faveur des malades et des personnes en fin de vie." },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": { "label": "Dossier « Évaluation de la loi Claeys-Leonetti » (Assemblée nationale)", "url": "https://www.tricoteuses.fr/assemblee/dossiers_legislatifs/DLR5L16N46764", "ref": "DLR5L16N46764" },
+      "durationMs": 2900
+    },
+    {
+      "claim": { "id": "c3", "text": "Cette loi a instauré, sous conditions, un droit à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès (article L. 1110-5-2 du code de la santé publique)." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Article L. 1110-5-2 du code de la santé publique (sédation profonde et continue)", "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253", "ref": "art. L. 1110-5-2 CSP" },
+      "durationMs": 8100
+    },
+    {
+      "claim": { "id": "c3", "text": "Cette loi a instauré, sous conditions, un droit à une sédation profonde et continue provoquant une altération de la conscience maintenue jusqu'au décès (article L. 1110-5-2 du code de la santé publique)." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1400
+    },
+    {
+      "claim": { "id": "c4", "text": "Les directives anticipées s'imposent au médecin, sauf urgence vitale ou lorsqu'elles apparaissent manifestement inappropriées (article L. 1111-11 du code de la santé publique)." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Loi n° 2016-87 du 2 février 2016 (dite Claeys-Leonetti)", "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031970253", "ref": "art. L. 1111-11 CSP" },
+      "durationMs": 7000
+    },
+    {
+      "claim": { "id": "c4", "text": "Les directives anticipées s'imposent au médecin, sauf urgence vitale ou lorsqu'elles apparaissent manifestement inappropriées (article L. 1111-11 du code de la santé publique)." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1700
+    },
+    {
+      "claim": { "id": "c5", "text": "Un projet de loi relatif à l'accompagnement des malades et de la fin de vie (« aide à mourir ») a été débattu à l'Assemblée nationale." },
+      "mentor": "mentor-juriste",
+      "verdict": "unknown",
+      "durationMs": 5200
+    },
+    {
+      "claim": { "id": "c5", "text": "Un projet de loi relatif à l'accompagnement des malades et de la fin de vie (« aide à mourir ») a été débattu à l'Assemblée nationale." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 2100,
+      "error": "texte en cours de navette — statut non certifiable en l'état"
+    }
+  ]
+}

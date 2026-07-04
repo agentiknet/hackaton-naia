@@ -237,6 +237,33 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Live pipeline steps (streaming) */
+  .steps-msg {
+    align-self: flex-start;
+    background: var(--bleu-light);
+    border: 1px solid var(--gris-border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    max-width: 88%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .step-row { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--gris-text); }
+  .step-row .step-ic { width: 18px; text-align: center; flex: 0 0 18px; }
+  .step-row.pending { opacity: .45; }
+  .step-row.active { color: var(--bleu); font-weight: 600; }
+  .step-row.done { color: var(--vert); }
+  .step-row.done .step-ic { color: var(--vert); font-weight: 700; }
+  .step-count {
+    font-size: 11px; background: var(--white); border: 1px solid var(--gris-border);
+    border-radius: 20px; padding: 1px 8px; color: var(--gris-text); font-weight: 600;
+  }
+  .mini-spinner {
+    width: 12px; height: 12px; border: 2px solid var(--bleu);
+    border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite;
+  }
+
   /* Input area */
   .chat-input-area {
     border-top: 1px solid var(--gris-border);
@@ -969,28 +996,19 @@ async function sendMessage() {
 
   input.value = '';
 
-  // Show spinner
-  const spinnerEl = document.createElement('div');
-  spinnerEl.className = 'spinner-msg';
-  spinnerEl.id = 'loadingSpinner';
-  spinnerEl.innerHTML = '<div class="spinner"></div><span>Le Conseil des Mentors vérifie votre question…</span>';
-  document.getElementById('chatMessages').appendChild(spinnerEl);
-  scrollChat();
+  // Live pipeline steps panel (replaces the mute spinner)
+  const stepsState = startSteps();
 
   try {
     let data;
     if (isDemoMode) {
+      // Offline fallback (server unreachable): staged fake, no stream.
       await fakeDelay(1200);
       data = getDemoResponse(message, currentProfile);
       setDemoBadgeVisible(true);
     } else {
-      const res = await fetch(API_BASE + '/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: 'demo', message, profile: currentProfile }),
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      data = await res.json();
+      const result = await streamChat(message, stepsState);
+      data = normalizeResult(result);
       setDemoBadgeVisible(false);
     }
 
@@ -1093,8 +1111,122 @@ function renderDraft(data) {
 }
 
 function removeSpinner() {
-  const s = document.getElementById('loadingSpinner');
-  if (s) s.remove();
+  ['loadingSpinner', 'pipelineSteps'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+}
+
+/* ─── Live pipeline steps (streaming) ─── */
+const STEP_DEFS = [
+  { key: 'draft',   icon: '✍️', label: 'Naia rédige la réponse' },
+  { key: 'extract', icon: '🔎', label: 'Extraction des affirmations' },
+  { key: 'verify',  icon: '⚖️', label: 'Le Conseil des Mentors vérifie' },
+  { key: 'certify', icon: '🏛️', label: 'Certification' },
+];
+
+function startSteps() {
+  const el = document.createElement('div');
+  el.className = 'steps-msg';
+  el.id = 'pipelineSteps';
+  document.getElementById('chatMessages').appendChild(el);
+  const state = { verifDone: 0, verifTotal: 0, claimCount: null };
+  STEP_DEFS.forEach(d => { state[d.key] = 'pending'; });
+  renderSteps(state);
+  scrollChat();
+  return state;
+}
+
+function renderSteps(state) {
+  const el = document.getElementById('pipelineSteps');
+  if (!el) return;
+  el.innerHTML = STEP_DEFS.map(def => {
+    const st = state[def.key] || 'pending';
+    let extra = '';
+    if (def.key === 'extract' && state.claimCount != null) {
+      extra = ` <span class="step-count">${state.claimCount} affirmation${state.claimCount > 1 ? 's' : ''}</span>`;
+    }
+    if (def.key === 'verify' && state.verifTotal) {
+      extra = ` <span class="step-count">${state.verifDone}/${state.verifTotal}</span>`;
+    }
+    const mark = st === 'done' ? '✓' : def.icon;
+    const spin = st === 'active' ? '<span class="mini-spinner"></span>' : '';
+    return `<div class="step-row ${st}"><span class="step-ic">${mark}</span><span class="step-tx">${def.label}${extra}</span>${spin}</div>`;
+  }).join('');
+}
+
+/* Map the streamed PipelineResult (camelCase) to the snake_case shape the
+   renderers expect (same as the non-streaming /api/chat response). */
+function normalizeResult(r) {
+  if (!r) return { status: 'refused', response: '', sources: [], confidence_score: 0, verifications: [] };
+  return {
+    conversation_id: r.conversationId ?? r.conversation_id,
+    response: r.response,
+    sources: r.sources || [],
+    confidence_score: r.confidenceScore ?? r.confidence_score ?? 0,
+    status: r.status,
+    refusal_reason: r.refusalReason ?? r.refusal_reason,
+    verifications: r.verifications || [],
+    claims: r.claims || [],
+  };
+}
+
+async function streamChat(message, state) {
+  // Reset the Conseil panel so it visibly fills up as verifications arrive.
+  document.getElementById('auditContent').innerHTML =
+    '<div class="audit-empty">En attente de la vérification…</div>';
+  document.getElementById('auditBadge').style.display = 'none';
+  const liveVerifs = [];
+
+  const res = await fetch(API_BASE + '/api/chat/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: 'demo', message, profile: currentProfile }),
+  });
+  if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '', finalResult = null;
+
+  const activate = (key) => {
+    let passed = false;
+    for (const d of STEP_DEFS) {
+      if (d.key === key) { state[key] = 'active'; passed = true; }
+      else if (!passed) state[d.key] = 'done';
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (!line) continue;
+      let ev; try { ev = JSON.parse(line); } catch { continue; }
+      if (ev.type === 'stage') {
+        activate(ev.key);
+        if (ev.key === 'extract') {
+          state.claimCount = ev.count ?? null;
+          state.verifTotal = (ev.count || 0) * 2;
+        }
+        renderSteps(state);
+      } else if (ev.type === 'verification') {
+        liveVerifs.push(ev.verification);
+        state.verifDone = liveVerifs.length;
+        renderSteps(state);
+        renderAudit({ verifications: liveVerifs });
+      } else if (ev.type === 'done') {
+        finalResult = ev.result;
+      }
+    }
+  }
+  STEP_DEFS.forEach(d => { state[d.key] = 'done'; });
+  renderSteps(state);
+  return finalResult;
 }
 
 function showErrorBanner() {

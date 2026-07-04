@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { stream } from "hono/streaming";
 import { readAudit } from "./audit/log.js";
 import { mastra } from "./mastra/index.js";
 import { mentorJuristeAgent } from "./mastra/agents/mentor-juriste/index.js";
@@ -11,7 +12,7 @@ import { mentorParlementAgent } from "./mastra/agents/mentor-parlement/index.js"
 import type { Profile } from "./mentors/types.js";
 import { notifyCertified } from "./notify/agentpush.js";
 import { extractClaims } from "./pipeline/claims.js";
-import { runDraft, runPipeline } from "./pipeline/index.js";
+import { runDraft, runPipeline, runPipelineStreaming } from "./pipeline/index.js";
 import { verifyClaim } from "./pipeline/verify.js";
 
 const app = new Hono();
@@ -58,6 +59,25 @@ app.post("/api/chat", async (c) => {
     confidence_score: result.confidenceScore,
     status: result.status,
     refusal_reason: result.refusalReason,
+  });
+});
+
+// Streaming chat: emits newline-delimited JSON events (stage / verification /
+// done) so the UI can show the pipeline working live instead of a silent wait.
+app.post("/api/chat/stream", async (c) => {
+  const body = await c.req.json<ChatRequestBody>();
+  const conversationId = randomUUID();
+
+  c.header("Content-Type", "application/x-ndjson; charset=utf-8");
+  c.header("Cache-Control", "no-cache, no-transform");
+  c.header("X-Accel-Buffering", "no");
+
+  return stream(c, async (s) => {
+    const emit = (event: unknown) => s.write(`${JSON.stringify(event)}\n`);
+    const result = await runPipelineStreaming(body.message, body.profile, conversationId, emit);
+
+    const target = body.channel && body.address ? { channel: body.channel, address: body.address } : undefined;
+    void notifyCertified(body.message, result, target);
   });
 });
 

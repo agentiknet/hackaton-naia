@@ -1,0 +1,108 @@
+{
+  "conversationId": "demo-cannabis-3e9a1b7c-8d24-4f61-b0a3-9c5e21f7d840",
+  "matchKeywords": [
+    "cannabis",
+    "cannabis medical",
+    "cannabis médical",
+    "usage medical du cannabis",
+    "usage médical du cannabis",
+    "cannabis therapeutique",
+    "cannabis thérapeutique",
+    "cannabis a usage medical",
+    "cannabis à usage médical"
+  ],
+  "response": "## Le cannabis médical est autorisé pour certains patients, dans un cadre encadré\n\nOui — le cannabis **à usage médical** est autorisé en France pour **certains patients**, dans des indications précises et sous strict encadrement médical. Il ne s'agit pas d'une légalisation générale : le cannabis à usage récréatif reste interdit.\n\nLe dispositif a d'abord pris la forme d'une **expérimentation** encadrée par le **décret n° 2020-1230 du 7 octobre 2020**, prolongée par le **décret n° 2023-202 du 25 mars 2023**, puis ajustée par le **décret n° 2024-259 du 23 mars 2024**.\n\nLes indications retenues visent des situations d'impasse thérapeutique, notamment :\n\n- douleurs neuropathiques réfractaires aux traitements accessibles ;\n- certaines formes d'épilepsie pharmacorésistante ;\n- symptômes rebelles en oncologie ;\n- situations palliatives ;\n- spasticité douloureuse de la sclérose en plaques.\n\nL'accès se fait sur prescription, au sein de structures de référence et avec un suivi renforcé. Le dispositif évolue vers une intégration dans le droit commun sous statut de médicament.\n\n*Sources : décrets relatifs à l'expérimentation de l'usage médical du cannabis (Légifrance).*",
+  "sources": [
+    {
+      "label": "Décret n° 2020-1230 du 7 octobre 2020 relatif à l'expérimentation de l'usage médical du cannabis",
+      "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042410284",
+      "ref": "JORFTEXT000042410284"
+    },
+    {
+      "label": "Décret n° 2023-202 du 25 mars 2023 (prolongation de l'expérimentation)",
+      "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047342691",
+      "ref": "JORFTEXT000047342691"
+    },
+    {
+      "label": "Décret n° 2024-259 du 23 mars 2024 (modification du décret de 2020)",
+      "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049315034",
+      "ref": "JORFTEXT000049315034"
+    }
+  ],
+  "confidenceScore": 74,
+  "status": "answered",
+  "claims": [
+    { "id": "c1", "text": "En France, le cannabis à usage médical est autorisé pour certains patients dans des indications précises et sous encadrement médical." },
+    { "id": "c2", "text": "L'usage médical du cannabis a été encadré par le décret n° 2020-1230 du 7 octobre 2020 relatif à l'expérimentation de l'usage médical du cannabis." },
+    { "id": "c3", "text": "L'expérimentation de l'usage médical du cannabis a été prolongée par le décret n° 2023-202 du 25 mars 2023." },
+    { "id": "c4", "text": "Les indications concernées incluent notamment les douleurs neuropathiques réfractaires, certaines épilepsies pharmacorésistantes, les situations palliatives et la spasticité de la sclérose en plaques." },
+    { "id": "c5", "text": "Le cannabis à usage récréatif demeure interdit en France." }
+  ],
+  "verifications": [
+    {
+      "claim": { "id": "c1", "text": "En France, le cannabis à usage médical est autorisé pour certains patients dans des indications précises et sous encadrement médical." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Décret n° 2020-1230 du 7 octobre 2020", "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042410284", "ref": "JORFTEXT000042410284" },
+      "durationMs": 7600
+    },
+    {
+      "claim": { "id": "c1", "text": "En France, le cannabis à usage médical est autorisé pour certains patients dans des indications précises et sous encadrement médical." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1500
+    },
+    {
+      "claim": { "id": "c2", "text": "L'usage médical du cannabis a été encadré par le décret n° 2020-1230 du 7 octobre 2020 relatif à l'expérimentation de l'usage médical du cannabis." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Décret n° 2020-1230 du 7 octobre 2020", "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042410284", "ref": "JORFTEXT000042410284" },
+      "durationMs": 6900
+    },
+    {
+      "claim": { "id": "c2", "text": "L'usage médical du cannabis a été encadré par le décret n° 2020-1230 du 7 octobre 2020 relatif à l'expérimentation de l'usage médical du cannabis." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1300
+    },
+    {
+      "claim": { "id": "c3", "text": "L'expérimentation de l'usage médical du cannabis a été prolongée par le décret n° 2023-202 du 25 mars 2023." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Décret n° 2023-202 du 25 mars 2023 (prolongation)", "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047342691", "ref": "JORFTEXT000047342691" },
+      "durationMs": 7100
+    },
+    {
+      "claim": { "id": "c3", "text": "L'expérimentation de l'usage médical du cannabis a été prolongée par le décret n° 2023-202 du 25 mars 2023." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1200
+    },
+    {
+      "claim": { "id": "c4", "text": "Les indications concernées incluent notamment les douleurs neuropathiques réfractaires, certaines épilepsies pharmacorésistantes, les situations palliatives et la spasticité de la sclérose en plaques." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Décret n° 2020-1230 du 7 octobre 2020", "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042410284", "ref": "JORFTEXT000042410284" },
+      "durationMs": 8300
+    },
+    {
+      "claim": { "id": "c4", "text": "Les indications concernées incluent notamment les douleurs neuropathiques réfractaires, certaines épilepsies pharmacorésistantes, les situations palliatives et la spasticité de la sclérose en plaques." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1700
+    },
+    {
+      "claim": { "id": "c5", "text": "Le cannabis à usage récréatif demeure interdit en France." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Décret n° 2020-1230 du 7 octobre 2020", "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042410284", "ref": "code de la santé publique" },
+      "durationMs": 6400
+    },
+    {
+      "claim": { "id": "c5", "text": "Le cannabis à usage récréatif demeure interdit en France." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1400
+    }
+  ]
+}

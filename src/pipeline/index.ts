@@ -331,29 +331,67 @@ function significantSlugTokens(slug: string): Set<string> {
   return new Set(slug.split("-").filter((t) => t.length > 1 && !SLUG_STOPWORDS.has(t)));
 }
 
-/** Replay a captured fixture. Exact slug match first; failing that (phrasing
- * variance from a live operator typing the question), fall back to the fixture
- * with the strongest topical token overlap — but ONLY above a real threshold,
- * so an off-topic or trap question falls through to a genuine live refusal
- * instead of replaying a certified answer about the wrong subject. */
-function loadDemoFixture(question: string): PipelineResult | undefined {
+/** lowercase + accent-fold, for keyword substring matching. */
+function foldText(s: string): string {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+type DemoFixture = PipelineResult & { matchKeywords?: string[] };
+
+/** Replay a captured fixture. Matching, in order of confidence:
+ *  1. exact question slug;
+ *  2. keyword hit — the question contains one of a fixture's `matchKeywords`
+ *     (accent-insensitive substring). This is explicit and predictable, so a
+ *     short real question ("loi euthanasie légale ?") reliably replays its
+ *     fixture while an unrelated topic never does;
+ *  3. topical token overlap (>=3 significant tokens) as a last resort.
+ * A trap / out-of-scope question matches none and returns undefined, so the
+ * caller can serve a fast honest refusal instead of a certified wrong answer. */
+function loadDemoFixture(question: string): DemoFixture | undefined {
   const exact = demoFixturePath(question);
-  if (existsSync(exact)) return JSON.parse(readFileSync(exact, "utf-8")) as PipelineResult;
+  if (existsSync(exact)) return JSON.parse(readFileSync(exact, "utf-8")) as DemoFixture;
   if (!existsSync(DEMO_FIXTURES_DIR)) return undefined;
 
-  const qTokens = significantSlugTokens(slugifyQuestion(question));
-  if (qTokens.size === 0) return undefined;
+  const files = readdirSync(DEMO_FIXTURES_DIR).filter((f) => f.endsWith(".json"));
+  const parsed = files.map((f) => JSON.parse(readFileSync(join(DEMO_FIXTURES_DIR, f), "utf-8")) as DemoFixture);
 
-  let best: { file: string; overlap: number } | undefined;
-  for (const file of readdirSync(DEMO_FIXTURES_DIR).filter((f) => f.endsWith(".json"))) {
-    const fTokens = significantSlugTokens(file.replace(/\.json$/, ""));
-    let overlap = 0;
-    for (const t of qTokens) if (fTokens.has(t)) overlap++;
-    if (!best || overlap > best.overlap) best = { file, overlap };
+  // 2. keyword hit
+  const foldedQuestion = foldText(question);
+  for (const fixture of parsed) {
+    if (fixture.matchKeywords?.some((kw) => foldedQuestion.includes(foldText(kw)))) return fixture;
   }
 
-  if (!best || best.overlap < 3) return undefined;
-  return JSON.parse(readFileSync(join(DEMO_FIXTURES_DIR, best.file), "utf-8")) as PipelineResult;
+  // 3. token-overlap fallback
+  const qTokens = significantSlugTokens(slugifyQuestion(question));
+  if (qTokens.size === 0) return undefined;
+  let best: { fixture: DemoFixture; overlap: number } | undefined;
+  for (let i = 0; i < files.length; i++) {
+    const fTokens = significantSlugTokens(files[i].replace(/\.json$/, ""));
+    let overlap = 0;
+    for (const t of qTokens) if (fTokens.has(t)) overlap++;
+    if (!best || overlap > best.overlap) best = { fixture: parsed[i], overlap };
+  }
+  return best && best.overlap >= 3 ? best.fixture : undefined;
+}
+
+/** Fast, honest result when a demo question matches no fixture — instead of
+ * falling through to a slow (~1-2 min) live LLM call in a demo, Naia says it
+ * has no indexed official source for this question and refuses. */
+function buildDemoMissResult(conversationId: string): PipelineResult {
+  return {
+    conversationId,
+    response: [
+      "Je n'ai pas de source officielle indexée pour cette question dans le périmètre de cette démonstration.",
+      "Par principe, je préfère ne rien affirmer plutôt que de risquer une information non vérifiée.",
+      "Reformulez autour d'un texte, d'un article ou d'un scrutin précis — par exemple l'énergie (article L. 100-4) ou la fin de vie (loi Claeys-Leonetti) — et je vérifierai chaque affirmation avant de répondre.",
+    ].join("\n"),
+    sources: [],
+    confidenceScore: 0,
+    status: "refused",
+    refusalReason: "Aucune source officielle indexée pour cette question dans le périmètre de la démonstration.",
+    claims: [],
+    verifications: [],
+  };
 }
 
 function saveDemoFixture(question: string, result: PipelineResult): void {
@@ -381,12 +419,15 @@ export async function runPipeline(
   profile: Profile,
   conversationId: string = randomUUID(),
 ): Promise<PipelineResult> {
-  if (isDemoReplayEnabled()) {
+  // Demo mode (replay), outside a capture run: only fixtures answer. Anything
+  // unmatched returns an instant honest refusal rather than a ~2-min live call.
+  if (isDemoReplayEnabled() && !isDemoCaptureEnabled()) {
     const fixture = loadDemoFixture(question);
     if (fixture) {
       await ensureDemoAudit(question, profile, fixture);
       return fixture;
     }
+    return buildDemoMissResult(conversationId);
   }
 
   const threshold = confidenceThreshold();
@@ -420,6 +461,81 @@ export async function runPipeline(
   }
 
   return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Streaming pipeline — emits staged progress so the UI can show the pipeline
+// working (draft → extract → per-claim verification → certification) instead of
+// a silent 1-2 min spinner.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type StreamEvent =
+  | { type: "stage"; key: string; label: string; count?: number }
+  | { type: "verification"; verification: Verification }
+  | { type: "done"; result: PipelineResult };
+
+type StreamEmit = (event: StreamEvent) => void | Promise<void>;
+
+const streamSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export async function runPipelineStreaming(
+  question: string,
+  profile: Profile,
+  conversationId: string,
+  emit: StreamEmit,
+): Promise<PipelineResult> {
+  if (isDemoReplayEnabled() && !isDemoCaptureEnabled()) {
+    const fixture = loadDemoFixture(question);
+    if (fixture) {
+      await streamReplay(fixture, question, profile, emit);
+      return fixture;
+    }
+    const miss = buildDemoMissResult(conversationId);
+    await streamMiss(miss, emit);
+    return miss;
+  }
+
+  // Live path: coarse stage markers around the real pipeline.
+  await emit({ type: "stage", key: "draft", label: "Naia rédige une réponse à partir des sources officielles…" });
+  const result = await runPipeline(question, profile, conversationId);
+  for (const v of result.verifications) await emit({ type: "verification", verification: v });
+  await emit({ type: "stage", key: "certify", label: "Arbitrage et certification…" });
+  await emit({ type: "done", result });
+  return result;
+}
+
+/** Paces a replayed fixture into watchable stages: draft, extract, each
+ * verification one by one (so the Conseil visibly fills up), then certification. */
+async function streamReplay(fixture: DemoFixture, question: string, profile: Profile, emit: StreamEmit): Promise<void> {
+  await emit({ type: "stage", key: "draft", label: "Naia rédige une réponse à partir des sources officielles…" });
+  await streamSleep(650);
+
+  const verifs = fixture.verifications ?? [];
+  const claimCount = fixture.claims?.length ?? new Set(verifs.map((v) => v.claim.id)).size;
+  await emit({ type: "stage", key: "extract", label: "Extraction des affirmations factuelles à vérifier", count: claimCount });
+  await streamSleep(550);
+
+  await emit({ type: "stage", key: "verify", label: "Le Conseil des Mentors vérifie chaque affirmation contre les sources officielles" });
+  for (const v of verifs) {
+    await streamSleep(300);
+    await emit({ type: "verification", verification: v });
+  }
+
+  await streamSleep(400);
+  await emit({ type: "stage", key: "certify", label: "Arbitrage pur-code et certification…" });
+  await streamSleep(500);
+
+  await ensureDemoAudit(question, profile, fixture);
+  await emit({ type: "done", result: fixture });
+}
+
+/** Fast honest miss: a couple of stages then a refusal — never a long wait. */
+async function streamMiss(miss: PipelineResult, emit: StreamEmit): Promise<void> {
+  await emit({ type: "stage", key: "draft", label: "Recherche d'une source officielle indexée…" });
+  await streamSleep(600);
+  await emit({ type: "stage", key: "extract", label: "Aucune source officielle indexée pour cette question", count: 0 });
+  await streamSleep(500);
+  await emit({ type: "done", result: miss });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
