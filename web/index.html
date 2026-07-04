@@ -557,11 +557,51 @@
     font-weight: 600;
   }
   .audit-content {
-    display: none;
-    border-top: 1px solid var(--gris-border);
-    padding: 0;
+    display: block;
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 12px 14px;
   }
-  .audit-card.open .audit-content { display: block; }
+
+  /* Right rail: certification (phase 1) stacked over the Conseil audit (phase 2) */
+  .side-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+  }
+  .side-rail .cert-panel:first-child { max-height: 55vh; }
+  .audit-badge {
+    margin-left: auto;
+    font-size: 11px;
+    background: var(--bleu-light);
+    color: var(--bleu);
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .verif-list { display: flex; flex-direction: column; gap: 10px; }
+  .verif-card {
+    border: 1px solid var(--gris-border);
+    border-left: 3px solid var(--gris-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .verif-card.verdict-supported { border-left-color: var(--vert); }
+  .verif-card.verdict-unsupported { border-left-color: var(--rouge); }
+  .verif-card.verdict-unknown { border-left-color: #ccc; }
+  .verif-claim { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
+  .verif-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 11px; }
+  .verif-mentor { font-weight: 600; color: var(--bleu); }
+  .verif-dur { color: var(--gris); margin-left: auto; white-space: nowrap; }
+  .verif-source {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--gris-text);
+    border-top: 1px dashed var(--gris-border);
+    padding-top: 6px;
+    word-break: break-word;
+  }
 
   .audit-table-wrap { overflow-x: auto; }
   .audit-table {
@@ -749,15 +789,32 @@
     </div>
   </section>
 
-  <!-- Certification -->
-  <aside class="cert-panel">
-    <div class="cert-header">
-      <span class="cert-icon">✓</span>
-      <h2>Certification</h2>
+  <!-- Right rail: two phases — certification then the Conseil's audit -->
+  <aside class="side-rail">
+
+    <!-- Phase 1 · Certification -->
+    <div class="cert-panel">
+      <div class="cert-header">
+        <span class="cert-icon">✓</span>
+        <h2>1 · Certification</h2>
+      </div>
+      <div class="cert-body" id="certBody">
+        <div class="cert-empty">Les résultats de certification apparaîtront ici après la première réponse.</div>
+      </div>
     </div>
-    <div class="cert-body" id="certBody">
-      <div class="cert-empty">Les résultats de certification apparaîtront ici après la première réponse.</div>
+
+    <!-- Phase 2 · Conseil des Mentors (audit) -->
+    <div class="cert-panel audit-panel">
+      <div class="cert-header">
+        <span class="cert-icon">🔍</span>
+        <h2>2 · Conseil des Mentors</h2>
+        <span class="audit-badge" id="auditBadge" style="display:none">0</span>
+      </div>
+      <div class="audit-content" id="auditContent">
+        <div class="audit-empty" id="auditEmpty">Chaque affirmation est vérifiée indépendamment par les deux mentors — le détail s'affiche ici après la réponse.</div>
+      </div>
     </div>
+
   </aside>
 
 </div>
@@ -767,20 +824,6 @@
   <div class="timeline-card">
     <h2>Parcours de la loi</h2>
     <div class="timeline" id="timeline"></div>
-  </div>
-</section>
-
-<!-- ═══ Audit ═══ -->
-<section class="audit-section">
-  <div class="audit-card" id="auditCard">
-    <button class="audit-toggle" onclick="toggleAudit()">
-      <span>🔍 Audit du Conseil des Mentors</span>
-      <span class="audit-badge" id="auditBadge" style="display:none">0 vérifications</span>
-      <span class="chevron">▼</span>
-    </button>
-    <div class="audit-content" id="auditContent">
-      <div class="audit-empty" id="auditEmpty">Dépliez pour charger l'audit détaillé après une réponse.</div>
-    </div>
   </div>
 </section>
 
@@ -955,13 +998,9 @@ async function sendMessage() {
     renderAssistantMessage(data);
     renderCertification(data);
 
-    // Store conversationId for audit
+    // Store conversationId, then surface the Conseil's audit in the right rail
     if (data.conversation_id) conversationId = data.conversation_id;
-
-    // Pre-load audit if open
-    if (document.getElementById('auditCard').classList.contains('open')) {
-      loadAudit();
-    }
+    loadAudit(data);
 
   } catch (err) {
     removeSpinner();
@@ -973,6 +1012,7 @@ async function sendMessage() {
     renderAssistantMessage(data);
     renderCertification(data);
     if (data.conversation_id) conversationId = data.conversation_id;
+    loadAudit(data);
   }
 
   isLoading = false;
@@ -1188,18 +1228,16 @@ function renderCertification(data, bodyId = 'certBody') {
    Audit
    ═══════════════════════════════════════════════ */
 
-function toggleAudit() {
-  const card = document.getElementById('auditCard');
-  card.classList.toggle('open');
-  if (card.classList.contains('open')) {
-    loadAudit();
-  }
-}
-
-async function loadAudit() {
+async function loadAudit(preloaded) {
   const content = document.getElementById('auditContent');
 
-  content.innerHTML = '<div class="audit-loading"><div class="spinner"></div>Chargement de l\'audit…</div>';
+  // Fast path: the chat/draft response already carried verifications.
+  if (preloaded && Array.isArray(preloaded.verifications) && preloaded.verifications.length) {
+    renderAudit(preloaded);
+    return;
+  }
+
+  content.innerHTML = '<div class="audit-loading"><div class="spinner"></div>Le Conseil vérifie chaque affirmation…</div>';
 
   try {
     let data;
@@ -1236,7 +1274,7 @@ function renderAudit(data) {
   // Update badge
   const badge = document.getElementById('auditBadge');
   if (verifications.length > 0) {
-    badge.textContent = verifications.length + ' vérification' + (verifications.length > 1 ? 's' : '');
+    badge.textContent = verifications.length + ' vérif.';
     badge.style.display = 'inline-block';
   } else {
     badge.style.display = 'none';
@@ -1247,9 +1285,9 @@ function renderAudit(data) {
     return;
   }
 
-  let rows = verifications.map(v => {
+  // Compact cards (the rail is narrow — a 5-column table would not fit).
+  const cards = verifications.map(v => {
     const verdict = v.verdict || 'unknown';
-    const verdictClass = 'verdict-' + verdict;
     const verdictLabel = { supported: 'Confirmé', unsupported: 'Réfuté', unknown: 'Non vérifié' }[verdict] || verdict;
     // The API sends claim/source as objects and durationMs (camelCase);
     // demo/legacy shapes send strings. Normalize both.
@@ -1258,37 +1296,25 @@ function renderAudit(data) {
     const mentorRaw = v.mentor || v.mentor_type || v.role || '—';
     const mentor = { 'mentor-juriste': 'Juriste', 'mentor-parlement': 'Parlement' }[mentorRaw] || mentorRaw;
     const srcObj = v.source ?? v.citation ?? v.source_ref;
-    const source = (srcObj && typeof srcObj === 'object' ? (srcObj.label || srcObj.ref || srcObj.url) : srcObj) || '—';
+    const source = (srcObj && typeof srcObj === 'object' ? (srcObj.label || srcObj.ref || srcObj.url) : srcObj) || null;
     const ms = v.durationMs ?? v.duration_ms;
     const duration = ms != null
       ? (ms < 1000 ? ms + ' ms' : (ms / 1000).toFixed(1) + ' s')
-      : (v.duration || '—');
+      : (v.duration || '');
 
     return `
-      <tr>
-        <td>${escapeHtml(claim)}</td>
-        <td>${escapeHtml(mentor)}</td>
-        <td><span class="verdict-badge ${verdictClass}">${verdictLabel}</span></td>
-        <td>${escapeHtml(String(source))}</td>
-        <td style="white-space:nowrap">${escapeHtml(String(duration))}</td>
-      </tr>`;
+      <div class="verif-card verdict-${escapeHtml(verdict)}">
+        <div class="verif-claim">${escapeHtml(claim)}</div>
+        <div class="verif-meta">
+          <span class="verif-mentor">${escapeHtml(mentor)}</span>
+          <span class="verdict-badge verdict-${escapeHtml(verdict)}">${verdictLabel}</span>
+          ${duration ? `<span class="verif-dur">${escapeHtml(String(duration))}</span>` : ''}
+        </div>
+        ${source ? `<div class="verif-source">${escapeHtml(String(source))}</div>` : ''}
+      </div>`;
   }).join('');
 
-  content.innerHTML = `
-    <div class="audit-table-wrap">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Affirmation vérifiée</th>
-            <th>Mentor</th>
-            <th>Verdict</th>
-            <th>Source</th>
-            <th>Durée</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
+  content.innerHTML = `<div class="verif-list">${cards}</div>`;
 }
 
 function escapeHtml(str) {

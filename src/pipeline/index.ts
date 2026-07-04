@@ -320,10 +320,40 @@ function isDemoCaptureEnabled(): boolean {
   return process.env.CAPTURE_DEMO === "1";
 }
 
+/** Slug tokens that carry no topical signal — dropped before overlap scoring. */
+const SLUG_STOPWORDS = new Set([
+  "de", "la", "le", "les", "des", "du", "un", "une", "et", "en", "a", "au", "aux",
+  "que", "qui", "quoi", "dit", "sur", "est", "quel", "quelle", "quels", "quelles",
+  "pour", "dans", "par", "loi", "l", "d",
+]);
+
+function significantSlugTokens(slug: string): Set<string> {
+  return new Set(slug.split("-").filter((t) => t.length > 1 && !SLUG_STOPWORDS.has(t)));
+}
+
+/** Replay a captured fixture. Exact slug match first; failing that (phrasing
+ * variance from a live operator typing the question), fall back to the fixture
+ * with the strongest topical token overlap — but ONLY above a real threshold,
+ * so an off-topic or trap question falls through to a genuine live refusal
+ * instead of replaying a certified answer about the wrong subject. */
 function loadDemoFixture(question: string): PipelineResult | undefined {
-  const path = demoFixturePath(question);
-  if (!existsSync(path)) return undefined;
-  return JSON.parse(readFileSync(path, "utf-8")) as PipelineResult;
+  const exact = demoFixturePath(question);
+  if (existsSync(exact)) return JSON.parse(readFileSync(exact, "utf-8")) as PipelineResult;
+  if (!existsSync(DEMO_FIXTURES_DIR)) return undefined;
+
+  const qTokens = significantSlugTokens(slugifyQuestion(question));
+  if (qTokens.size === 0) return undefined;
+
+  let best: { file: string; overlap: number } | undefined;
+  for (const file of readdirSync(DEMO_FIXTURES_DIR).filter((f) => f.endsWith(".json"))) {
+    const fTokens = significantSlugTokens(file.replace(/\.json$/, ""));
+    let overlap = 0;
+    for (const t of qTokens) if (fTokens.has(t)) overlap++;
+    if (!best || overlap > best.overlap) best = { file, overlap };
+  }
+
+  if (!best || best.overlap < 3) return undefined;
+  return JSON.parse(readFileSync(join(DEMO_FIXTURES_DIR, best.file), "utf-8")) as PipelineResult;
 }
 
 function saveDemoFixture(question: string, result: PipelineResult): void {
