@@ -1,6 +1,6 @@
 # Naia — Pitch Deck (hackathon Assemblée nationale, 2026-07-04)
 
-Format : 9 slides, une idée par slide. TITRE + bullets + note orateur.
+Format : 11 slides, une idée par slide. TITRE + bullets + note orateur.
 
 ---
 
@@ -23,7 +23,7 @@ Format : 9 slides, une idée par slide. TITRE + bullets + note orateur.
 
 - L'assistante parlementaire qui ne délivre une réponse que si elle est sourcée sur les textes officiels.
 - Chaque affirmation est vérifiée avant envoi par un Conseil des Mentors — pas par l'agent lui-même.
-- Deux profils d'usage dès aujourd'hui : citoyen et député.
+- Deux surfaces dès aujourd'hui : le citoyen **comprend** la loi, le député la **rédige** — les deux 100 % sourcées.
 - Le refus assumé fait partie du produit, pas de l'échec.
 
 **Note orateur :** « Naia, c'est l'assistante parlementaire qui préfère dire "je ne sais pas" plutôt que d'inventer. »
@@ -37,9 +37,9 @@ Format : 9 slides, une idée par slide. TITRE + bullets + note orateur.
 - Naia rédige un brouillon de réponse et identifie ses affirmations (claims) une par une.
 - Un mentor-juriste vérifie chaque claim contre Légifrance/JORF ; un mentor-parlement vérifie contre les dossiers, amendements et scrutins de l'Assemblée/Sénat — via Moulineuse, notre passerelle MCP vers les données officielles.
 - Le passage entre brouillon et réponse envoyée est un gate imposé par le code, pas laissé à la discrétion du modèle.
-- Rien ne sort sans être passé par ce contrôle.
+- Et l'utilisateur voit le pipeline travailler **en direct** : rédaction → extraction des affirmations → vérification par le Conseil, affirmation par affirmation, carte par carte.
 
-**Note orateur :** « Ce n'est pas l'IA qui se fait confiance à elle-même : c'est un conseil indépendant qui vérifie chaque phrase. »
+**Note orateur :** « Ce n'est pas l'IA qui se fait confiance à elle-même : c'est un conseil indépendant qui vérifie chaque phrase — et vous le voyez travailler en direct. »
 
 ---
 
@@ -56,38 +56,63 @@ Format : 9 slides, une idée par slide. TITRE + bullets + note orateur.
 
 ---
 
-## Slide 5 — Démo, 4 temps
+## Slide 5 — Tout le parcours de la loi
 
-**TITRE : La démo — 4 temps, en direct**
+**TITRE : Produire, contrôler, évaluer — la même exigence de preuve**
 
-- **1. Réponse citoyenne sourcée** : une vraie question, une réponse certifiée citant l'article L.100-4 réel du code de l'énergie.
-- **2. Vue député** : la même loi vue côté élu — votes, amendements, parcours législatif sourcés.
-- **3. Question piège** : une loi qui n'existe pas → Naia **refuse**, audit affiché à l'écran en direct.
-- **4. Filet de sécurité** : si le réseau lâche en plein pitch, bascule automatique en mode démo (fixtures) — la démo continue sans coupure.
-- Ce mécanisme est fait main, pas un business-plan.
+- **Produire** : aider le député à rédiger un texte, chaque référence certifiée contre les textes en vigueur (atelier « Rédiger la loi »).
+- **Contrôler** : éclairer votes, amendements et parcours législatif via les données Assemblée/Sénat (mentor-parlement).
+- **Évaluer** : rendre la loi compréhensible au citoyen, avec un score de confiance sur chaque réponse.
+- Un seul et même Conseil des Mentors garde les trois temps.
 
-**Note orateur :** « Regardez : sur une question piège, elle refuse — et vous voyez l'audit qui le prouve, en direct. »
+**Note orateur :** « Sur tout le parcours de la loi — la produire, la contrôler, l'évaluer — Naia applique la même règle : rien sans preuve. »
 
 ---
 
-## Slide 6 — Transparence et auditabilité
+## Slide 6 — Rédiger la loi
+
+**TITRE : Rédiger la loi, pas seulement la lire**
+
+- Le député décrit une intention → Naia propose un **dispositif** + un **exposé sommaire**.
+- Chaque référence de l'amendement est certifiée par le Conseil contre les textes en vigueur.
+- Le Conseil ajoute des **suggestions légistiques** : articulation avec l'existant, base de référence, recevabilité (art. 40).
+- La même exigence de preuve que pour une réponse — appliquée à la production du droit.
+
+**Note orateur :** « Naia ne se contente pas de lire la loi : elle aide à l'écrire — et refuse de citer un article qu'elle ne peut pas prouver. »
+
+---
+
+## Slide 7 — Démo, en direct
+
+**TITRE : La démo — en direct, sur de vraies sources**
+
+- **Comprendre** : « le cannabis est-il autorisé pour certains patients ? », « la loi euthanasie ? » → réponses certifiées, sourcées sur les décrets et lois réels ; le pipeline défile à l'écran.
+- **Rédiger** : une intention d'amendement → dispositif + exposé + suggestions du Conseil, certifiés.
+- **Refus assumé** : une question piège ou hors-source → refus **instantané et motivé**, audit affiché en direct.
+- **Filet de sécurité** : réseau coupé en plein pitch → bascule automatique en mode démo (fixtures), la démo continue sans coupure.
+
+**Note orateur :** « Regardez le Conseil vérifier chaque phrase en direct — et sur une question piège, refuser, avec l'audit qui le prouve. »
+
+---
+
+## Slide 8 — Transparence et auditabilité
 
 **TITRE : Chaque décision est loggée, chaque affirmation est traçable**
 
-- Chaque verdict des mentors est écrit dans un journal d'audit (JSONL) : claim, mentor, verdict, source, horodatage.
-- On peut remonter, affirmation par affirmation, jusqu'à la source qui l'a validée ou invalidée.
-- Ce n'est pas une boîte noire qui décide seule : c'est une chaîne de décision consultable après coup.
+- Le Conseil se remplit sous vos yeux : chaque affirmation, un verdict d'un mentor (confirmé / réfuté / non vérifié), sa source, sa durée.
+- Chaque verdict est aussi écrit dans un journal d'audit (JSONL) : claim, mentor, verdict, source, horodatage — consultable après coup.
+- Quand les deux mentors ne sont pas d'accord, ça se voit : le désaccord est la preuve que personne ne signe à l'aveugle.
 - Prêt pour une logique de conformité type AI Act — la traçabilité est intégrée dès la conception, pas ajoutée après.
 
 **Note orateur :** « On ne vous demande pas de nous croire sur parole : chaque décision est écrite, datée, et sourcée. »
 
 ---
 
-## Slide 7 — Pourquoi c'est crédible
+## Slide 9 — Pourquoi c'est crédible
 
 **TITRE : C'est debout, en direct, sur de vraies sources**
 
-- Ce que vous venez de voir tourne sur les vraies données Assemblée/Sénat/Légifrance, pas sur un jeu de données factice.
+- Plusieurs sujets réels déjà couverts, sourcés sur les textes officiels : énergie (art. L.100-4), fin de vie (loi Claeys-Leonetti), cannabis médical (décrets d'expérimentation).
 - Le pipeline (rédaction → extraction de claims → vérification parallèle → arbitrage) est du code qui tourne, pas un schéma en slide.
 - Le refus sur la question piège n'est pas scripté dans une démo vidéo : c'est le Conseil des Mentors qui le décide, en direct.
 - Construit et calibré en une session hackathon — la fondation tient.
@@ -96,7 +121,7 @@ Format : 9 slides, une idée par slide. TITRE + bullets + note orateur.
 
 ---
 
-## Slide 8 — Roadmap
+## Slide 10 — Roadmap
 
 **TITRE : De la démo aux 577**
 
@@ -109,7 +134,7 @@ Format : 9 slides, une idée par slide. TITRE + bullets + note orateur.
 
 ---
 
-## Slide 9 — Closing
+## Slide 11 — Closing
 
 **TITRE : La confiance, une fonctionnalité — pas une option**
 
