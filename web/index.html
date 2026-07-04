@@ -335,6 +335,20 @@
     color: var(--bleu);
   }
   .cert-header .cert-icon { font-size: 16px; }
+  .cert-header h2 { flex: 1; }
+  .export-pdf-btn {
+    border: 1px solid var(--bleu);
+    background: var(--white);
+    color: var(--bleu);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .export-pdf-btn:hover { background: var(--bleu-light); }
+  .export-pdf-btn:disabled { opacity: .5; cursor: default; }
   .cert-body {
     flex: 1;
     overflow-y: auto;
@@ -927,6 +941,7 @@
       <div class="cert-header">
         <span class="cert-icon">✓</span>
         <h2>Certification du Conseil</h2>
+        <button class="export-pdf-btn" id="exportAnswerBtn" onclick="exportActiveAnswer()" disabled>Exporter en PDF</button>
       </div>
       <div class="cert-body" id="certBody">
         <div class="cert-empty">Les résultats de certification apparaîtront ici après la première réponse.</div>
@@ -988,6 +1003,7 @@
       <div class="cert-header">
         <span class="cert-icon">✓</span>
         <h2>Certification</h2>
+        <button class="export-pdf-btn" id="exportDraftBtn" onclick="exportActiveDraft()" disabled>Exporter en PDF</button>
       </div>
       <div class="cert-body" id="draftCertBody">
         <div class="cert-empty">La certification de la rédaction apparaîtra ici.</div>
@@ -1273,7 +1289,11 @@ async function streamDraft(intent, baseText) {
   return finalResult;
 }
 
+let lastDraftData = null;
+
 function renderDraft(data) {
+  lastDraftData = data;
+  document.getElementById('exportDraftBtn').disabled = false;
   const out = document.getElementById('draftOutput');
   const isRefused = data.status === 'refused';
   const sources = data.sources || [];
@@ -1523,6 +1543,7 @@ function renderAssistantMessage(data) {
    answer's certification + audit into the rail (and its claim highlights). */
 let turns = [];
 let activeQuestion = null;
+let activeTurnIdx = null;
 
 function registerTurn(question, data, msgEl) {
   const idx = turns.length;
@@ -1545,12 +1566,15 @@ function selectTurn(idx) {
   const t = turns[idx];
   if (!t) return;
   activeQuestion = t.question;
+  activeTurnIdx = idx;
   turns.forEach((x, i) => { if (x.chipEl) x.chipEl.classList.toggle('active', i === idx); });
   lastAssistantEl = t.contentEl;
   if (t.data.conversation_id) conversationId = t.data.conversation_id;
   renderCertification(t.data);
   loadAudit(t.data);
   renderTimeline(t.data.timeline, t.data.timeline_title || t.data.timelineTitle);
+  const exportBtn = document.getElementById('exportAnswerBtn');
+  if (exportBtn) exportBtn.disabled = false;
 }
 
 function scrollChat() {
@@ -1951,6 +1975,63 @@ function sentenceSpans(html) {
   const parts = html.split(/(?<=[.!?»])(?<!\bart\.)(?<![A-Z]\.)\s+(?=[A-ZÀ-ÖØ-Þ«])/g);
   if (parts.length <= 1) return html;
   return parts.map(p => `<span class="md-s">${p}</span>`).join(' ');
+}
+
+/* ─── Export PDF ─── */
+function pdfDateSuffix() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function exportPdf(endpoint, payload, filename) {
+  try {
+    const res = await fetch(API_BASE + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    toast('error', 'Export PDF impossible : ' + err.message);
+  }
+}
+
+function exportActiveAnswer() {
+  const t = turns[activeTurnIdx];
+  if (!t) { toast('warn', 'Aucune réponse à exporter.'); return; }
+  const d = t.data;
+  exportPdf('/api/export/answer', {
+    question: t.question,
+    response: d.response || '',
+    sources: d.sources || [],
+    claims: d.claims || [],
+    verifications: d.verifications || [],
+    confidenceScore: d.confidence_score ?? 0,
+    status: d.status,
+    refusalReason: d.refusal_reason,
+  }, `naia-reponse-${pdfDateSuffix()}.pdf`);
+}
+
+function exportActiveDraft() {
+  if (!lastDraftData) { toast('warn', 'Aucune rédaction à exporter.'); return; }
+  const d = lastDraftData;
+  exportPdf('/api/export/draft', {
+    intent: d.intent || '',
+    draft: d.draft || d.response || '',
+    sources: d.sources || [],
+    suggestions: d.suggestions || [],
+    confidenceScore: d.confidence_score ?? 0,
+    status: d.status,
+    refusalReason: d.refusal_reason,
+  }, `naia-redaction-${pdfDateSuffix()}.pdf`);
 }
 
 /* ═══════════════════════════════════════════════
