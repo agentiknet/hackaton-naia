@@ -637,6 +637,62 @@
     .timeline-step { flex: 0 0 30%; }
     .timeline-step::before { display: none; }
   }
+
+  /* ─── View tabs ─── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    max-width: 1400px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+  }
+  .nav-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gris-text);
+    cursor: pointer;
+  }
+  .nav-tab:hover { color: var(--bleu); }
+  .nav-tab.active { color: var(--bleu); border-bottom-color: var(--bleu); }
+  .view[hidden] { display: none; }
+
+  /* ─── Drafting workspace ─── */
+  .draft-hint { font-size: 13px; color: var(--gris-text); }
+  .draft-form { padding: 16px 20px; border-bottom: 1px solid #eee; }
+  .draft-label { display: block; font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 10px 0 4px; }
+  .draft-label:first-child { margin-top: 0; }
+  .draft-opt { font-weight: 400; color: var(--gris-text); }
+  .draft-textarea {
+    width: 100%; box-sizing: border-box; padding: 10px 12px;
+    border: 1px solid #d0d0d0; border-radius: 6px; font: inherit; font-size: 14px;
+    resize: vertical;
+  }
+  .draft-textarea:focus { outline: none; border-color: var(--bleu); }
+  .draft-btn { margin-top: 14px; width: 100%; }
+  .draft-output { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .draft-doc {
+    background: var(--bleu-light); border-radius: 8px; padding: 16px 18px;
+    color: #1a1a1a; line-height: 1.55; font-size: 14px;
+  }
+  .draft-doc.refused { background: var(--rouge-light); border-left: 3px solid var(--rouge); }
+  .draft-doc .md-h { color: var(--bleu); font-size: 15px; font-weight: 700; margin: 14px 0 6px; }
+  .draft-doc .md-h:first-child { margin-top: 0; }
+  .draft-sources-inline { margin-top: 10px; font-size: 12px; color: var(--gris-text); }
+  .draft-sources-inline a { color: var(--bleu); text-decoration: none; }
+  .suggestions-block { padding: 0 20px 16px; }
+  .suggestions-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--bleu); margin: 12px 0 8px;
+  }
+  .suggestions-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .suggestions-list li {
+    font-size: 13px; line-height: 1.45; color: #1a1a1a;
+    background: #fff8e6; border-left: 3px solid #e0a800; border-radius: 4px; padding: 8px 10px;
+  }
 </style>
 </head>
 <body>
@@ -650,6 +706,15 @@
     <button class="demo-toggle" id="demoToggle" title="Forcer le mode démo (sans API)">Mode démo</button>
   </div>
 </header>
+
+<!-- ═══ View tabs ═══ -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" data-view="comprendre">Comprendre la loi</button>
+  <button class="nav-tab" data-view="rediger">Rédiger la loi</button>
+</nav>
+
+<!-- ═══ VIEW: Comprendre ═══ -->
+<div id="viewComprendre" class="view">
 
 <!-- ═══ Main: Chat + Certification ═══ -->
 <div class="main">
@@ -719,6 +784,52 @@
   </div>
 </section>
 
+</div><!-- /viewComprendre -->
+
+<!-- ═══ VIEW: Rédiger ═══ -->
+<div id="viewRediger" class="view" hidden>
+  <div class="main">
+    <!-- Drafting workspace -->
+    <section class="chat-panel">
+      <div class="chat-header">
+        <h2>Atelier de rédaction législative</h2>
+        <span class="draft-hint">Naia rédige · le Conseil vérifie et suggère</span>
+      </div>
+
+      <div class="draft-form">
+        <label class="draft-label" for="draftIntent">Intention législative</label>
+        <textarea id="draftIntent" class="draft-textarea" rows="3"
+          placeholder="Ex: Renforcer l'objectif de réduction de la consommation d'énergie finale à l'horizon 2035 en modifiant l'article L. 100-4 du code de l'énergie."></textarea>
+
+        <label class="draft-label" for="draftBase">Texte de base à amender <span class="draft-opt">(facultatif)</span></label>
+        <textarea id="draftBase" class="draft-textarea" rows="2"
+          placeholder="Collez ici l'article ou l'alinéa existant à modifier (facultatif)."></textarea>
+
+        <button class="chat-send draft-btn" id="draftBtn" onclick="submitDraft()">Rédiger et certifier</button>
+      </div>
+
+      <div class="draft-output" id="draftOutput">
+        <div class="chat-empty">
+          <div class="chat-empty-icon">📜</div>
+          <p>Décrivez l'intention d'un article ou d'un amendement.<br>Naia en propose une rédaction, sourcée et vérifiée par le Conseil.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certification + suggestions -->
+    <aside class="cert-panel">
+      <div class="cert-header">
+        <span class="cert-icon">✓</span>
+        <h2>Certification</h2>
+      </div>
+      <div class="cert-body" id="draftCertBody">
+        <div class="cert-empty">La certification de la rédaction apparaîtra ici.</div>
+      </div>
+      <div class="suggestions-block" id="draftSuggestions"></div>
+    </aside>
+  </div>
+</div><!-- /viewRediger -->
+
 <footer class="footer">
   Naia — Hackathon Assemblée Nationale 2026 · Le parcours de la loi : vers une IA de confiance
 </footer>
@@ -755,6 +866,17 @@ function renderTimeline() {
   `).join('');
 }
 renderTimeline();
+
+/* ─── View tabs ─── */
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const view = tab.dataset.view;
+    document.getElementById('viewComprendre').hidden = view !== 'comprendre';
+    document.getElementById('viewRediger').hidden = view !== 'rediger';
+  });
+});
 
 /* ─── Profile toggle ─── */
 document.querySelectorAll('.profile-toggle button').forEach(btn => {
@@ -861,6 +983,75 @@ function fakeDelay(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
+/* ─── Drafting workspace ─── */
+let isDrafting = false;
+
+async function submitDraft() {
+  const intent = document.getElementById('draftIntent').value.trim();
+  if (!intent || isDrafting) return;
+  const baseText = document.getElementById('draftBase').value.trim();
+
+  isDrafting = true;
+  const btn = document.getElementById('draftBtn');
+  btn.disabled = true;
+  btn.textContent = 'Le Conseil rédige et vérifie…';
+
+  const out = document.getElementById('draftOutput');
+  out.innerHTML = '<div class="audit-loading"><div class="spinner"></div>Naia rédige, le Conseil des Mentors vérifie chaque référence…</div>';
+  document.getElementById('draftSuggestions').innerHTML = '';
+
+  try {
+    let data;
+    if (isDemoMode) {
+      await fakeDelay(1400);
+      data = getDemoDraft(intent);
+      setDemoBadgeVisible(true);
+    } else {
+      const res = await fetch(API_BASE + '/api/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent, base_text: baseText || undefined }),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      data = await res.json();
+      setDemoBadgeVisible(false);
+    }
+    renderDraft(data);
+  } catch (err) {
+    await fakeDelay(500);
+    const data = getDemoDraft(intent);
+    setDemoBadgeVisible(true);
+    showErrorBanner();
+    renderDraft(data);
+  }
+
+  isDrafting = false;
+  btn.disabled = false;
+  btn.textContent = 'Rédiger et certifier';
+}
+
+function renderDraft(data) {
+  const out = document.getElementById('draftOutput');
+  const isRefused = data.status === 'refused';
+  const sources = data.sources || [];
+  const srcHtml = (sources.length > 0 && !isRefused)
+    ? `<div class="draft-sources-inline">Sources : ${sources.map(s =>
+        `<a href="${s.url || '#'}" target="_blank" rel="noopener">${escapeHtml(s.label || s.ref || 'source')}</a>`).join(' · ')}</div>`
+    : '';
+  out.innerHTML = `<div class="draft-doc${isRefused ? ' refused' : ''}">${formatMarkdown(data.draft || data.response || '')}${srcHtml}</div>`;
+
+  // Certification (reuse the shared gauge into the drafting panel)
+  renderCertification(data, 'draftCertBody');
+
+  // Suggestions
+  const sug = document.getElementById('draftSuggestions');
+  const list = Array.isArray(data.suggestions) ? data.suggestions : [];
+  sug.innerHTML = list.length > 0
+    ? `<div class="suggestions-title">Suggestions du Conseil</div>
+       <ul class="suggestions-list">${list.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
+    : '';
+}
+
 function removeSpinner() {
   const s = document.getElementById('loadingSpinner');
   if (s) s.remove();
@@ -912,8 +1103,8 @@ function scrollChat() {
 }
 
 /* ─── Render certification panel ─── */
-function renderCertification(data) {
-  const body = document.getElementById('certBody');
+function renderCertification(data, bodyId = 'certBody') {
+  const body = document.getElementById(bodyId);
   const score = data.confidence_score ?? 0;
   // The API speaks answered|insufficient|refused; the panel speaks
   // certified|insufficient|refused. Map once, here.
@@ -1174,6 +1365,24 @@ function getDemoResponse(message, profile) {
     confidence_score: 87,
     status: 'certified',
     conversation_id: 'demo-certified-' + Date.now(),
+  };
+}
+
+function getDemoDraft(intent) {
+  return {
+    conversation_id: 'demo-draft-' + Date.now(),
+    intent,
+    status: 'certified',
+    confidence_score: 78,
+    draft: `## Dispositif\n\n**Article 1er**\n\nLe 2° du I de l'article L. 100-4 du code de l'énergie est ainsi modifié :\n\n1° Après le mot « finale », sont insérés les mots « d'au moins 55 % en 2035 et » ;\n\n2° Les mots « de 50 % en 2050 » sont remplacés par les mots « de 60 % en 2050 ».\n\n## Exposé sommaire\n\nL'article L. 100-4 du code de l'énergie (identifiant Légifrance LEGIARTI000047717642, en vigueur depuis le 24 juin 2023) fixe à son 2° du I un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à 2012, avec des jalons intermédiaires. Le présent amendement ajoute un jalon contraignant à l'horizon 2035 et rehausse la cible de 2050, afin d'aligner la trajectoire nationale sur les engagements climatiques. La référence de calcul (2012) et la structure de l'alinéa sont conservées pour préserver la cohérence du dispositif existant.`,
+    sources: [
+      { label: 'Article L. 100-4 du code de l\'énergie (en vigueur)', url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642', ref: 'LEGIARTI000047717642' },
+    ],
+    suggestions: [
+      'Vérifier l\'articulation avec l\'article L. 100-1 A (loi de programmation quinquennale énergie-climat) : un objectif chiffré dans le code peut entrer en tension avec le renvoi à la loi de programmation.',
+      'Préciser la base de référence « par rapport à 2012 » dans le nouveau jalon 2035 pour éviter toute ambiguïté d\'interprétation.',
+      'Un objectif de 55 % dès 2035 crée une marche importante avec le jalon de 20 % en 2030 déjà inscrit : documenter la faisabilité dans l\'exposé pour prévenir un risque d\'irrecevabilité au titre de la clarté normative.',
+    ],
   };
 }
 

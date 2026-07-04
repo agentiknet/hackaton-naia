@@ -1,0 +1,52 @@
+{
+  "conversationId": "draft-8d27e367-a362-4357-8e42-747b1df22f71",
+  "intent": "Renforcer l'objectif de réduction de la consommation d'énergie finale à l'horizon 2035 en modifiant l'article L. 100-4 du code de l'énergie.",
+  "draft": "## Dispositif\n\n**Article 1er**\n\nLe 2° du I de l'article L. 100-4 du code de l'énergie est ainsi modifié :\n\n1° Après le mot « finale », sont insérés les mots « d'au moins 55 % en 2035 et » ;\n\n2° Les mots « de 50 % en 2050 » sont remplacés par les mots « de 60 % en 2050 ».\n\n## Exposé sommaire\n\nLe 2° du I de l'article L. 100-4 du code de l'énergie (identifiant Légifrance LEGIARTI000047717642, en vigueur depuis le 24 juin 2023) fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012, en visant des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030. Le présent amendement ajoute un jalon contraignant à l'horizon 2035 (au moins 55 %) et rehausse la cible de 2050 à 60 %, afin d'aligner la trajectoire nationale sur les engagements climatiques. La base de référence (2012) et la structure de l'alinéa sont conservées pour préserver la cohérence du dispositif existant.",
+  "sources": [
+    {
+      "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)",
+      "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642",
+      "ref": "LEGIARTI000047717642"
+    }
+  ],
+  "confidenceScore": 78,
+  "status": "answered",
+  "suggestions": [
+    "Vérifier l'articulation avec l'article L. 100-1 A (loi de programmation quinquennale énergie-climat) : inscrire un objectif chiffré directement dans le code peut entrer en tension avec le renvoi à la loi de programmation.",
+    "Préciser la base de référence « par rapport à 2012 » dans le nouveau jalon 2035 pour lever toute ambiguïté d'interprétation.",
+    "Un objectif de 55 % dès 2035 crée une marche importante avec le jalon de 20 % en 2030 déjà inscrit : documenter la faisabilité dans l'exposé sommaire pour prévenir un risque au titre de la clarté et de l'intelligibilité de la loi.",
+    "Contrôler la recevabilité financière (article 40) : la mesure semble sans charge nouvelle mais l'exposé doit l'expliciter."
+  ],
+  "claims": [
+    { "id": "c1", "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012." },
+    { "id": "c2", "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030." }
+  ],
+  "verifications": [
+    {
+      "claim": { "id": "c1", "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)", "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642", "ref": "LEGIARTI000047717642" },
+      "durationMs": 8200
+    },
+    {
+      "claim": { "id": "c1", "text": "Le 2° du I de l'article L. 100-4 du code de l'énergie fixe un objectif de réduction de la consommation énergétique finale de 50 % en 2050 par rapport à la référence 2012." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1300
+    },
+    {
+      "claim": { "id": "c2", "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030." },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": { "label": "Article L. 100-4 du code de l'énergie (en vigueur depuis le 24 juin 2023)", "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000047717642", "ref": "LEGIARTI000047717642" },
+      "durationMs": 7600
+    },
+    {
+      "claim": { "id": "c2", "text": "L'article L. 100-4 du code de l'énergie, en vigueur depuis le 24 juin 2023, vise des objectifs intermédiaires d'environ 7 % en 2023 et de 20 % en 2030." },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1100
+    }
+  ]
+}

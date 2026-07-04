@@ -11,7 +11,7 @@ import { mentorParlementAgent } from "./mastra/agents/mentor-parlement/index.js"
 import type { Profile } from "./mentors/types.js";
 import { notifyCertified } from "./notify/agentpush.js";
 import { extractClaims } from "./pipeline/claims.js";
-import { runPipeline } from "./pipeline/index.js";
+import { runDraft, runPipeline } from "./pipeline/index.js";
 import { verifyClaim } from "./pipeline/verify.js";
 
 const app = new Hono();
@@ -28,6 +28,11 @@ interface ChatRequestBody {
 
 interface VerifyRequestBody {
   text: string;
+}
+
+interface DraftRequestBody {
+  intent: string;
+  base_text?: string;
 }
 
 app.get("/health", (c) => {
@@ -53,6 +58,24 @@ app.post("/api/chat", async (c) => {
     confidence_score: result.confidenceScore,
     status: result.status,
     refusal_reason: result.refusalReason,
+  });
+});
+
+app.post("/api/draft", async (c) => {
+  const body = await c.req.json<DraftRequestBody>();
+  const conversationId = randomUUID();
+
+  const result = await runDraft(body.intent, body.base_text, conversationId);
+
+  return c.json({
+    conversation_id: result.conversationId,
+    intent: result.intent,
+    draft: result.draft,
+    sources: result.sources,
+    confidence_score: result.confidenceScore,
+    status: result.status,
+    refusal_reason: result.refusalReason,
+    suggestions: result.suggestions,
   });
 });
 

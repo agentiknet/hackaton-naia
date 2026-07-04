@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Agent } from "@mastra/core/agent";
 import { appendSummary, appendVerifications, readAudit } from "../audit/log.js";
@@ -387,6 +387,167 @@ export async function runPipeline(
 
   if (isDemoCaptureEnabled() && status === "answered") {
     saveDemoFixture(question, result);
+  }
+
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Drafting workspace ("Atelier de rédaction législative")
+//
+// Same trust contract as the Q&A pipeline — Naia drafts, the Conseil verifies
+// every factual anchor against official sources — but the deliverable is a
+// legislative text (dispositif + exposé sommaire) and the Conseil additionally
+// returns concrete drafting *suggestions* (coherence, abrogated/conflicting
+// references, normative clarity). This is the "production de la loi" surface.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface DraftResult {
+  conversationId: string;
+  intent: string;
+  draft: string;
+  sources: Source[];
+  confidenceScore: number;
+  status: PipelineStatus;
+  refusalReason?: string;
+  suggestions: string[];
+  claims: Claim[];
+  verifications: Verification[];
+}
+
+const DRAFT_FIXTURES_DIR = join(process.cwd(), "fixtures", "demo-draft");
+
+function draftFixturePath(intent: string): string {
+  return join(DRAFT_FIXTURES_DIR, `${slugifyQuestion(intent)}.json`);
+}
+
+/** Load the fixture for this exact intent; failing that (phrasing/apostrophe
+ * variance), fall back to the single canonical drafting fixture on disk. The
+ * drafting demo has one scenario, so any reasonable phrasing should replay it
+ * deterministically rather than fall through to an unstable live call. */
+function loadDraftFixture(intent: string): DraftResult | undefined {
+  const exact = draftFixturePath(intent);
+  if (existsSync(exact)) return JSON.parse(readFileSync(exact, "utf-8")) as DraftResult;
+
+  if (!existsSync(DRAFT_FIXTURES_DIR)) return undefined;
+  const [first] = readdirSync(DRAFT_FIXTURES_DIR).filter((f) => f.endsWith(".json")).sort();
+  if (!first) return undefined;
+  return JSON.parse(readFileSync(join(DRAFT_FIXTURES_DIR, first), "utf-8")) as DraftResult;
+}
+
+function saveDraftFixture(intent: string, result: DraftResult): void {
+  mkdirSync(DRAFT_FIXTURES_DIR, { recursive: true });
+  writeFileSync(draftFixturePath(intent), JSON.stringify(result, null, 2), "utf-8");
+}
+
+function buildDraftPrompt(intent: string, baseText?: string): string {
+  return [
+    profileFraming("depute"),
+    "",
+    "Tâche : RÉDIGER un texte législatif (article de loi ou amendement) à partir de l'intention ci-dessous.",
+    `Intention : ${intent}`,
+    baseText ? `\nTexte de base à amender :\n"""\n${baseText}\n"""` : "",
+    "",
+    "Produis exactement deux sections en Markdown :",
+    "## Dispositif",
+    "La rédaction normative précise (article, alinéas numérotés). Formulation juridique, impérative.",
+    "## Exposé sommaire",
+    "La justification, avec les références légales EXACTES des textes/articles existants visés ou modifiés,",
+    "vérifiées via tes outils (numéro d'article, texte, état VIGUEUR/ABROGÉ, date). N'invente aucun numéro d'article.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildSuggestionsPrompt(intent: string, draft: string): string {
+  return [
+    "Tu es juriste-légiste. Examine ce projet de rédaction législative destiné à un député.",
+    `Intention visée : ${intent}`,
+    "Projet de texte :",
+    '"""',
+    draft,
+    '"""',
+    "",
+    "Donne des SUGGESTIONS concrètes d'amélioration : cohérence juridique, références à des articles",
+    "abrogés ou en conflit, clarté et précision normative, risques de constitutionnalité ou d'irrecevabilité.",
+    "Réponds UNIQUEMENT par une liste à puces, une suggestion par ligne commençant par « - ».",
+    "Si un point est solide, ne le mentionne pas. Sois bref et opérationnel.",
+  ].join("\n");
+}
+
+/** Splits the reviewer's bulleted text into individual suggestions, tolerating
+ * "-", "*" or "•" bullets and dropping empty lines. */
+function parseSuggestions(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*[-*•]\s*/, "").trim())
+    .filter((line) => line.length > 0);
+}
+
+export async function runDraft(
+  intent: string,
+  baseText?: string,
+  conversationId: string = randomUUID(),
+): Promise<DraftResult> {
+  if (isDemoReplayEnabled()) {
+    const fixture = loadDraftFixture(intent);
+    if (fixture) {
+      // Reuse the same audit trail scheme so the drafting run is inspectable too.
+      if (!(await readAudit(fixture.conversationId))) {
+        await appendVerifications(fixture.conversationId, 1, fixture.verifications);
+        await appendSummary(fixture.conversationId, {
+          question: intent,
+          profile: "depute",
+          status: fixture.status,
+          confidenceScore: fixture.confidenceScore,
+          response: fixture.draft,
+        });
+      }
+      return fixture;
+    }
+  }
+
+  const threshold = confidenceThreshold();
+
+  const draftGen = await naiaAgent.generate(buildDraftPrompt(intent, baseText), { maxSteps: NAIA_MAX_STEPS });
+  const draft = draftGen.text;
+
+  const { claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 1, conversationId);
+  const status = resolveStatus(confidenceScore, unknownRatio(summaries), threshold);
+
+  // Council suggestions run regardless of verdict — even a draft that can't be
+  // certified benefits from concrete legistic feedback the député can act on.
+  const suggestionsGen = await mentorJuristeAgent.generate(buildSuggestionsPrompt(intent, draft), {
+    maxSteps: NAIA_MAX_STEPS,
+  });
+  const suggestions = parseSuggestions(suggestionsGen.text);
+
+  const sources = collectSources(summaries);
+  const refusalReason = status === "answered" ? undefined : buildRefusalReason(summaries);
+
+  await appendSummary(conversationId, {
+    question: intent,
+    profile: "depute",
+    status,
+    confidenceScore,
+    response: draft,
+  });
+
+  const result: DraftResult = {
+    conversationId,
+    intent,
+    draft,
+    sources,
+    confidenceScore,
+    status,
+    refusalReason,
+    suggestions,
+    claims,
+    verifications,
+  };
+
+  if (isDemoCaptureEnabled()) {
+    saveDraftFixture(intent, result);
   }
 
   return result;
