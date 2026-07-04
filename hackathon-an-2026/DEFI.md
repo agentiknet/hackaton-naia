@@ -72,6 +72,7 @@ Cochez les ressources utilisées en remplaçant `[ ]` par `[x]`.
 ![Refus assumé — réponse non certifiée (0/100)](images/image-3.png)
 
 ### Documents
+- [Vidéo de présentation (narrée)](docs/naia-presentation.mp4)
 - [Diapositives de présentation (7 slides)](docs/diapositives.pdf)
 - [Diapositives détaillées (11 slides)](docs/diapositives-detaillees.pdf)
 - [Présentation du défi](docs/naia-defi-presentation.md)
