@@ -1,0 +1,206 @@
+{
+  "conversationId": "demo-plf2026-4f8c2a91-6d73-4e58-9b12-8a3fca27e910",
+  "matchKeywords": [
+    "49.3",
+    "49-3",
+    "article 49 alinea 3",
+    "article 49 alinéa 3",
+    "motion de censure",
+    "motions de censure",
+    "plf 2026",
+    "loi de finances pour 2026",
+    "loi de finances 2026",
+    "controle parlementaire",
+    "contrôle parlementaire",
+    "scrutin",
+    "scrutin public",
+    "censure"
+  ],
+  "response": "## PLF 2026 : engagement de responsabilité (49.3) et motions de censure rejetées\n\nLe **projet de loi de finances pour 2026 (PLF 2026)** a fait l'objet, à plusieurs reprises, de l'engagement de la responsabilité du Gouvernement en application de l'**article 49, alinéa 3, de la Constitution** : le 20 janvier 2026 (première partie), le 23 janvier 2026 (seconde partie et ensemble du texte), puis le **30 janvier 2026 en lecture définitive** (acte de dossier n° DLR5L17N53689).\n\nÀ la suite de cette dernière lecture définitive, deux motions de censure ont été déposées puis **rejetées le 2 février 2026** :\n\n- une motion déposée par S. Peu, M. Panot, C. Chatelain et 110 autres députés, ayant recueilli **260 voix pour** (scrutin n° VTANR5L17V5284) ;\n- une motion déposée par les groupes Rassemblement National (M. Le Pen, É. Ciotti), ayant recueilli **135 voix pour** (scrutin n° VTANR5L17V5285).\n\nLa **majorité absolue** des membres composant l'Assemblée nationale étant fixée à **289 voix**, aucune des deux motions n'a atteint ce seuil. En conséquence, en application de l'article 49, alinéa 3, de la Constitution, le PLF 2026 est considéré comme adopté à ce stade de la procédure.\n\nCette séquence fait suite à un premier round de motions de censure, également rejetées, le 27 janvier 2026 (267 puis 140 voix), consécutif aux 49.3 des 20 et 23 janvier.\n\n*Sources : dossier législatif PLF 2026 et actes associés (Assemblée nationale, via tricoteuses.fr).*",
+  "sources": [
+    {
+      "label": "Dossier législatif — Projet de loi de finances pour 2026 (PLF 2026)",
+      "url": "https://www.tricoteuses.fr/redirection/DLR5L17N52428",
+      "ref": "DLR5L17N52428"
+    },
+    {
+      "label": "Acte — Engagement de responsabilité (49.3) en lecture définitive du PLF 2026, 30/01/2026",
+      "url": "https://www.tricoteuses.fr/redirection/DLR5L17N53689",
+      "ref": "DLR5L17N53689"
+    },
+    {
+      "label": "Scrutin n° VTANR5L17V5284 — motion de censure rejetée (260 voix), 02/02/2026",
+      "url": "https://www.tricoteuses.fr/redirection/VTANR5L17V5284",
+      "ref": "VTANR5L17V5284"
+    },
+    {
+      "label": "Scrutin n° VTANR5L17V5285 — motion de censure rejetée (135 voix), 02/02/2026",
+      "url": "https://www.tricoteuses.fr/redirection/VTANR5L17V5285",
+      "ref": "VTANR5L17V5285"
+    }
+  ],
+  "confidenceScore": 81,
+  "status": "answered",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Le Gouvernement a engagé sa responsabilité au titre de l'article 49, alinéa 3, de la Constitution sur le projet de loi de finances pour 2026 (PLF 2026) en lecture définitive, le 30 janvier 2026 (acte de dossier n° DLR5L17N53689)."
+    },
+    {
+      "id": "c2",
+      "text": "Cet engagement du 30 janvier 2026 faisait suite à deux précédents recours à l'article 49, alinéa 3, sur le même texte : le 20 janvier 2026 pour la première partie du PLF 2026, puis le 23 janvier 2026 pour la seconde partie et l'ensemble du texte."
+    },
+    {
+      "id": "c3",
+      "text": "Une motion de censure déposée par S. Peu, M. Panot, C. Chatelain et 110 autres députés a été rejetée le 2 février 2026, ayant recueilli 260 voix pour (scrutin n° VTANR5L17V5284)."
+    },
+    {
+      "id": "c4",
+      "text": "Une seconde motion de censure, déposée par M. Le Pen et É. Ciotti, a également été rejetée le 2 février 2026, ayant recueilli 135 voix pour (scrutin n° VTANR5L17V5285)."
+    },
+    {
+      "id": "c5",
+      "text": "La majorité absolue des membres composant l'Assemblée nationale étant fixée à 289 voix, aucune des deux motions de censure du 2 février 2026 (260 et 135 voix) n'a atteint ce seuil ; le PLF 2026 est en conséquence considéré comme adopté à ce stade, en application de l'article 49, alinéa 3, de la Constitution."
+    }
+  ],
+  "verifications": [
+    {
+      "claim": {
+        "id": "c1",
+        "text": "Le Gouvernement a engagé sa responsabilité au titre de l'article 49, alinéa 3, de la Constitution sur le projet de loi de finances pour 2026 (PLF 2026) en lecture définitive, le 30 janvier 2026 (acte de dossier n° DLR5L17N53689)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": {
+        "label": "Acte — Engagement de responsabilité (49.3) en lecture définitive du PLF 2026, 30/01/2026",
+        "url": "https://www.tricoteuses.fr/redirection/DLR5L17N53689",
+        "ref": "DLR5L17N53689"
+      },
+      "quote": "Engagement de la responsabilité du Gouvernement (article 49, alinéa 3, de la Constitution) — lecture définitive, Projet de loi de finances pour 2026 — 30/01/2026.",
+      "durationMs": 6200
+    },
+    {
+      "claim": {
+        "id": "c1",
+        "text": "Le Gouvernement a engagé sa responsabilité au titre de l'article 49, alinéa 3, de la Constitution sur le projet de loi de finances pour 2026 (PLF 2026) en lecture définitive, le 30 janvier 2026 (acte de dossier n° DLR5L17N53689)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "unknown",
+      "source": {
+        "label": "Hors du domaine de vérification du mentor Juriste"
+      },
+      "quote": "Cette claim porte sur un acte de procédure parlementaire (engagement de responsabilité, dossier législatif) et non sur le contenu d'un texte codifié consultable sur Légifrance. Le domaine de compétence du mentor Juriste se limite aux textes et articles de loi en vigueur.",
+      "durationMs": 2100
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "Cet engagement du 30 janvier 2026 faisait suite à deux précédents recours à l'article 49, alinéa 3, sur le même texte : le 20 janvier 2026 pour la première partie du PLF 2026, puis le 23 janvier 2026 pour la seconde partie et l'ensemble du texte."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": {
+        "label": "Dossier législatif — Projet de loi de finances pour 2026 (PLF 2026)",
+        "url": "https://www.tricoteuses.fr/redirection/DLR5L17N52428",
+        "ref": "DLR5L17N52428"
+      },
+      "quote": "Historique de la procédure : 49.3 le 20/01/2026 (1re partie), 49.3 le 23/01/2026 (2e partie et ensemble), 49.3 le 30/01/2026 (lecture définitive).",
+      "durationMs": 6800
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "Cet engagement du 30 janvier 2026 faisait suite à deux précédents recours à l'article 49, alinéa 3, sur le même texte : le 20 janvier 2026 pour la première partie du PLF 2026, puis le 23 janvier 2026 pour la seconde partie et l'ensemble du texte."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "unknown",
+      "source": {
+        "label": "Hors du domaine de vérification du mentor Juriste"
+      },
+      "durationMs": 1900
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "Une motion de censure déposée par S. Peu, M. Panot, C. Chatelain et 110 autres députés a été rejetée le 2 février 2026, ayant recueilli 260 voix pour (scrutin n° VTANR5L17V5284)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": {
+        "label": "Scrutin n° VTANR5L17V5284 — motion de censure rejetée (260 voix), 02/02/2026",
+        "url": "https://www.tricoteuses.fr/redirection/VTANR5L17V5284",
+        "ref": "VTANR5L17V5284"
+      },
+      "quote": "Scrutin public sur la motion de censure déposée en application de l'article 49, alinéa 3 : 260 voix pour, motion rejetée (majorité requise : 289).",
+      "durationMs": 7100
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "Une motion de censure déposée par S. Peu, M. Panot, C. Chatelain et 110 autres députés a été rejetée le 2 février 2026, ayant recueilli 260 voix pour (scrutin n° VTANR5L17V5284)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "unknown",
+      "source": {
+        "label": "Hors du domaine de vérification du mentor Juriste"
+      },
+      "durationMs": 1750
+    },
+    {
+      "claim": {
+        "id": "c4",
+        "text": "Une seconde motion de censure, déposée par M. Le Pen et É. Ciotti, a également été rejetée le 2 février 2026, ayant recueilli 135 voix pour (scrutin n° VTANR5L17V5285)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": {
+        "label": "Scrutin n° VTANR5L17V5285 — motion de censure rejetée (135 voix), 02/02/2026",
+        "url": "https://www.tricoteuses.fr/redirection/VTANR5L17V5285",
+        "ref": "VTANR5L17V5285"
+      },
+      "quote": "Scrutin public sur la motion de censure déposée en application de l'article 49, alinéa 3 : 135 voix pour, motion rejetée (majorité requise : 289).",
+      "durationMs": 6900
+    },
+    {
+      "claim": {
+        "id": "c4",
+        "text": "Une seconde motion de censure, déposée par M. Le Pen et É. Ciotti, a également été rejetée le 2 février 2026, ayant recueilli 135 voix pour (scrutin n° VTANR5L17V5285)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "unknown",
+      "source": {
+        "label": "Hors du domaine de vérification du mentor Juriste"
+      },
+      "durationMs": 1650
+    },
+    {
+      "claim": {
+        "id": "c5",
+        "text": "La majorité absolue des membres composant l'Assemblée nationale étant fixée à 289 voix, aucune des deux motions de censure du 2 février 2026 (260 et 135 voix) n'a atteint ce seuil ; le PLF 2026 est en conséquence considéré comme adopté à ce stade, en application de l'article 49, alinéa 3, de la Constitution."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Article 49 de la Constitution du 4 octobre 1958",
+        "ref": "art. 49, al. 3"
+      },
+      "quote": "Le Premier ministre peut, [...] engager la responsabilité du Gouvernement sur le vote d'un projet de loi de finances [...]. Le projet [...] est considéré comme adopté, sauf si une motion de censure [...] est votée [...]. Une motion de censure n'est adoptée que si elle est votée à la majorité des membres composant l'Assemblée.",
+      "durationMs": 8400
+    },
+    {
+      "claim": {
+        "id": "c5",
+        "text": "La majorité absolue des membres composant l'Assemblée nationale étant fixée à 289 voix, aucune des deux motions de censure du 2 février 2026 (260 et 135 voix) n'a atteint ce seuil ; le PLF 2026 est en conséquence considéré comme adopté à ce stade, en application de l'article 49, alinéa 3, de la Constitution."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": {
+        "label": "Scrutins n° VTANR5L17V5284 et VTANR5L17V5285 — motions de censure rejetées (260 et 135 voix), 02/02/2026",
+        "url": "https://www.tricoteuses.fr/redirection/VTANR5L17V5284",
+        "ref": "VTANR5L17V5284 / VTANR5L17V5285"
+      },
+      "quote": "Résultats des deux scrutins du 02/02/2026 : 260 voix et 135 voix, tous deux inférieurs à la majorité absolue de 289 voix requise pour l'adoption d'une motion de censure.",
+      "durationMs": 7300
+    }
+  ]
+}
