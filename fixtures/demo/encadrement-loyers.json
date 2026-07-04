@@ -1,0 +1,188 @@
+{
+  "conversationId": "demo-loyers-2c91af4e-83b6-4f27-a2d8-71c5e6b9a204",
+  "matchKeywords": [
+    "encadrement des loyers",
+    "encadrement loyers",
+    "encadrement loyer obligatoire",
+    "loyers zones tendues",
+    "loyers zone tendue",
+    "loyer zone tendue",
+    "plafond de loyer",
+    "plafond des loyers",
+    "loyer de reference",
+    "loyer de référence",
+    "location logement loyer"
+  ],
+  "response": "## L'encadrement des loyers n'est pas obligatoire partout en France\n\nNon — l'encadrement des loyers **ne s'applique pas automatiquement sur tout le territoire**. Il s'agit d'un dispositif **expérimental**, activé **commune par commune** sur demande.\n\n**Le cadre légal** : l'encadrement des loyers en zone tendue a été instauré à titre expérimental par l'**article 140 de la loi n° 2018-1021 du 23 novembre 2018 (dite loi ELAN)**. Seuls les établissements publics de coopération intercommunale (EPCI) ou les communes situés en zone tendue, et qui **en font expressément la demande**, peuvent l'activer sur leur territoire — c'est le cas notamment de Paris, Lille, Lyon, Bordeaux, Montpellier, Plaine Commune et Est Ensemble, mais pas de l'ensemble du pays.\n\n**Là où le dispositif s'applique**, le **préfet fixe par arrêté**, à partir des données de l'**observatoire local des loyers**, trois niveaux de référence (article 17 de la loi n° 89-462 du 6 juillet 1989) :\n\n- un **loyer de référence** ;\n- un **loyer de référence majoré** ;\n- un **loyer de référence minoré**.\n\nLe loyer de base d'un logement mis en location **ne peut excéder le loyer de référence majoré**. Un **complément de loyer** ne peut être appliqué que pour des caractéristiques exceptionnelles de localisation ou de confort, justifiées par le bailleur.\n\n**Et demain ?** Des **propositions de loi** visent, à l'Assemblée nationale (17e législature), à **généraliser et pérenniser** l'encadrement des loyers sur l'ensemble du territoire — le dispositif reste donc, à ce jour, expérimental et territorialement limité.\n\n*Sources : loi n° 2018-1021 du 23 novembre 2018 (ELAN) ; loi n° 89-462 du 6 juillet 1989 ; proposition de loi (17e législature), via tricoteuses.fr.*",
+  "sources": [
+    {
+      "label": "Loi n° 2018-1021 du 23 novembre 2018 (ELAN)",
+      "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000037642121",
+      "ref": "LEGITEXT000037642121"
+    },
+    {
+      "label": "Loi n° 89-462 du 6 juillet 1989 (art. 17)",
+      "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000006069108",
+      "ref": "LEGITEXT000006069108"
+    },
+    {
+      "label": "Proposition de loi — généraliser l'encadrement des loyers (17e lég.)",
+      "url": "https://www.tricoteuses.fr/redirection/DLR5L17N53337",
+      "ref": "DLR5L17N53337"
+    }
+  ],
+  "confidenceScore": 78,
+  "status": "answered",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "L'encadrement des loyers en zone tendue a été instauré à titre expérimental par l'article 140 de la loi n° 2018-1021 du 23 novembre 2018 (dite loi ELAN)."
+    },
+    {
+      "id": "c2",
+      "text": "L'encadrement des loyers ne s'applique pas automatiquement sur tout le territoire : seuls les EPCI ou communes en zone tendue qui en font la demande sont concernés (par exemple Paris, Lille, Lyon, Bordeaux, Montpellier, Plaine Commune, Est Ensemble)."
+    },
+    {
+      "id": "c3",
+      "text": "Là où l'encadrement s'applique, le préfet fixe par arrêté un loyer de référence, un loyer de référence majoré et un loyer de référence minoré, à partir des données de l'observatoire local des loyers (article 17 de la loi n° 89-462 du 6 juillet 1989)."
+    },
+    {
+      "id": "c4",
+      "text": "Le loyer de base d'un logement mis en location ne peut excéder le loyer de référence majoré ; un complément de loyer n'est possible que pour des caractéristiques exceptionnelles de localisation ou de confort."
+    },
+    {
+      "id": "c5",
+      "text": "Des propositions de loi visent à généraliser et pérenniser l'encadrement des loyers sur l'ensemble du territoire (17e législature)."
+    }
+  ],
+  "verifications": [
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'encadrement des loyers en zone tendue a été instauré à titre expérimental par l'article 140 de la loi n° 2018-1021 du 23 novembre 2018 (dite loi ELAN)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2018-1021 du 23 novembre 2018 (ELAN)",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000037642121",
+        "ref": "LEGITEXT000037642121"
+      },
+      "quote": "Article 140 — À titre expérimental et pour une durée de cinq ans à compter de la publication de la présente loi, dans les zones tendues mentionnées à l'article 17 de la loi n° 89-462 du 6 juillet 1989, un dispositif d'encadrement du niveau des loyers peut être mis en place.",
+      "durationMs": 7200
+    },
+    {
+      "claim": {
+        "id": "c1",
+        "text": "L'encadrement des loyers en zone tendue a été instauré à titre expérimental par l'article 140 de la loi n° 2018-1021 du 23 novembre 2018 (dite loi ELAN)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "source": {
+        "label": "Hors du domaine de vérification du mentor Parlement"
+      },
+      "quote": "Cette claim porte sur le contenu d'un article de loi codifié (article 140 de la loi ELAN) et non sur un dossier législatif, un scrutin ou une procédure parlementaire en cours. Le domaine de compétence du mentor Parlement se limite aux données parlementaires structurées.",
+      "durationMs": 1900
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "L'encadrement des loyers ne s'applique pas automatiquement sur tout le territoire : seuls les EPCI ou communes en zone tendue qui en font la demande sont concernés (par exemple Paris, Lille, Lyon, Bordeaux, Montpellier, Plaine Commune, Est Ensemble)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 2018-1021 du 23 novembre 2018 (ELAN)",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000037642121",
+        "ref": "LEGITEXT000037642121"
+      },
+      "quote": "Ce dispositif est mis en œuvre, à la demande des établissements publics de coopération intercommunale compétents en matière d'habitat ou de la commune de Paris, sur tout ou partie de leur territoire.",
+      "durationMs": 6900
+    },
+    {
+      "claim": {
+        "id": "c2",
+        "text": "L'encadrement des loyers ne s'applique pas automatiquement sur tout le territoire : seuls les EPCI ou communes en zone tendue qui en font la demande sont concernés (par exemple Paris, Lille, Lyon, Bordeaux, Montpellier, Plaine Commune, Est Ensemble)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1650
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "Là où l'encadrement s'applique, le préfet fixe par arrêté un loyer de référence, un loyer de référence majoré et un loyer de référence minoré, à partir des données de l'observatoire local des loyers (article 17 de la loi n° 89-462 du 6 juillet 1989)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 89-462 du 6 juillet 1989 (art. 17)",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000006069108",
+        "ref": "LEGITEXT000006069108"
+      },
+      "quote": "Dans les zones tendues, le représentant de l'État dans le département fixe chaque année par arrêté, pour chaque catégorie de logement et par secteur géographique, un loyer de référence, un loyer de référence majoré et un loyer de référence minoré, exprimés par un prix au mètre carré de surface habitable, à partir des données transmises par les observatoires locaux des loyers.",
+      "durationMs": 8100
+    },
+    {
+      "claim": {
+        "id": "c3",
+        "text": "Là où l'encadrement s'applique, le préfet fixe par arrêté un loyer de référence, un loyer de référence majoré et un loyer de référence minoré, à partir des données de l'observatoire local des loyers (article 17 de la loi n° 89-462 du 6 juillet 1989)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1500
+    },
+    {
+      "claim": {
+        "id": "c4",
+        "text": "Le loyer de base d'un logement mis en location ne peut excéder le loyer de référence majoré ; un complément de loyer n'est possible que pour des caractéristiques exceptionnelles de localisation ou de confort."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "supported",
+      "source": {
+        "label": "Loi n° 89-462 du 6 juillet 1989 (art. 17)",
+        "url": "https://www.tricoteuses.fr/redirection/LEGITEXT000006069108",
+        "ref": "LEGITEXT000006069108"
+      },
+      "quote": "Le loyer de base fixé dans le contrat de location ne peut excéder le loyer de référence majoré. Un complément de loyer peut être appliqué au loyer de base pour des logements présentant des caractéristiques de localisation ou de confort, par comparaison avec les logements de la même catégorie situés dans le même secteur géographique, le cas échéant.",
+      "durationMs": 7600
+    },
+    {
+      "claim": {
+        "id": "c4",
+        "text": "Le loyer de base d'un logement mis en location ne peut excéder le loyer de référence majoré ; un complément de loyer n'est possible que pour des caractéristiques exceptionnelles de localisation ou de confort."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "unknown",
+      "durationMs": 1400
+    },
+    {
+      "claim": {
+        "id": "c5",
+        "text": "Des propositions de loi visent à généraliser et pérenniser l'encadrement des loyers sur l'ensemble du territoire (17e législature)."
+      },
+      "mentor": "mentor-parlement",
+      "verdict": "supported",
+      "source": {
+        "label": "Proposition de loi — généraliser l'encadrement des loyers (17e lég.)",
+        "url": "https://www.tricoteuses.fr/redirection/DLR5L17N53337",
+        "ref": "DLR5L17N53337"
+      },
+      "quote": "Proposition de loi visant à généraliser et à pérenniser le dispositif d'encadrement des loyers sur l'ensemble du territoire national.",
+      "durationMs": 6400
+    },
+    {
+      "claim": {
+        "id": "c5",
+        "text": "Des propositions de loi visent à généraliser et pérenniser l'encadrement des loyers sur l'ensemble du territoire (17e législature)."
+      },
+      "mentor": "mentor-juriste",
+      "verdict": "unknown",
+      "source": {
+        "label": "Hors du domaine de vérification du mentor Juriste"
+      },
+      "quote": "Cette claim porte sur une proposition de loi en cours de navette, non encore un texte en vigueur consultable sur Légifrance. Le domaine de compétence du mentor Juriste se limite aux textes de loi et articles de code en vigueur.",
+      "durationMs": 2000
+    }
+  ]
+}
