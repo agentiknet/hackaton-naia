@@ -11,6 +11,8 @@ import { mentorJuristeAgent } from "./mastra/agents/mentor-juriste/index.js";
 import { mentorParlementAgent } from "./mastra/agents/mentor-parlement/index.js";
 import type { Profile } from "./mentors/types.js";
 import { notifyCertified } from "./notify/agentpush.js";
+import { buildAnswerPdf, buildDraftPdf } from "./export/pdf.js";
+import type { AnswerExportPayload, DraftExportPayload } from "./export/pdf.js";
 import { extractClaims } from "./pipeline/claims.js";
 import { runDraft, runDraftStreaming, runPipeline, runPipelineStreaming } from "./pipeline/index.js";
 import { verifyClaim } from "./pipeline/verify.js";
@@ -151,6 +153,27 @@ app.get("/api/audit/:conversationId", async (c) => {
   }
 
   return c.json(audit);
+});
+
+// PDF export: the front already holds the certified answer/draft in memory
+// (from the chat/draft response it just rendered) and posts it back as-is —
+// no server-side lookup, the pipeline itself is untouched.
+app.post("/api/export/answer", async (c) => {
+  const body = await c.req.json<AnswerExportPayload>();
+  const pdf = await buildAnswerPdf(body);
+  return c.body(new Uint8Array(pdf), 200, {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": 'attachment; filename="naia-reponse.pdf"',
+  });
+});
+
+app.post("/api/export/draft", async (c) => {
+  const body = await c.req.json<DraftExportPayload>();
+  const pdf = await buildDraftPdf(body);
+  return c.body(new Uint8Array(pdf), 200, {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": 'attachment; filename="naia-redaction.pdf"',
+  });
 });
 
 const EXPORTS_DIR = join(process.cwd(), "exports");
