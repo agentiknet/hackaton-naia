@@ -7,7 +7,7 @@ Naia : l'IA parlementaire qui ne répond que ce qu'elle peut prouver
 Les IA répondent toujours — même quand elles ne savent pas. En droit, une hallucination devient une désinformation citoyenne, ou l'erreur d'un élu. Naia ne délivre une réponse que si elle est sourcée sur les textes officiels (Légifrance, données de l'Assemblée et du Sénat). Avant tout envoi, un Conseil des Mentors vérifie chaque affirmation. Trois issues : certifiée, insuffisante, ou refusée — jamais une quatrième où elle invente.
 
 ### Porteur
-Fabrikapp
+Agentik
 
 ### Description longue
 
@@ -32,7 +32,8 @@ Fabrikapp
 ![Image principale](images/cover.png)
 
 ### Contributeurs
-- Jeremy
+- Jeremy André
+- Mathieu Belmain
 
 ### Ressources utilisées
 Cochez les ressources utilisées en remplaçant `[ ]` par `[x]`.
