@@ -1225,6 +1225,7 @@ async function streamDraft(intent, baseText) {
       else if (!passed) state[d.key] = 'done';
     }
   };
+  // (same guard as streamChat: a cut stream must not render as empty output)
 
   while (true) {
     const { done, value } = await reader.read();
@@ -1449,6 +1450,10 @@ async function streamChat(message, state) {
       }
     }
   }
+  // A stream that ends without a done event (server restarted mid-flight,
+  // connection dropped) must NOT render as an empty answer — fail loudly so
+  // the caller's catch shows the error toast and falls back.
+  if (!finalResult) throw new Error('stream ended without result');
   STEP_DEFS.forEach(d => { state[d.key] = 'done'; });
   renderSteps(state);
   return finalResult;
