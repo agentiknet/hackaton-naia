@@ -12,7 +12,7 @@ import { mentorParlementAgent } from "./mastra/agents/mentor-parlement/index.js"
 import type { Profile } from "./mentors/types.js";
 import { notifyCertified } from "./notify/agentpush.js";
 import { extractClaims } from "./pipeline/claims.js";
-import { runDraft, runPipeline, runPipelineStreaming } from "./pipeline/index.js";
+import { runDraft, runDraftStreaming, runPipeline, runPipelineStreaming } from "./pipeline/index.js";
 import { verifyClaim } from "./pipeline/verify.js";
 
 const app = new Hono();
@@ -59,8 +59,18 @@ app.post("/api/chat", async (c) => {
     confidence_score: result.confidenceScore,
     status: result.status,
     refusal_reason: result.refusalReason,
+    // Optional parcours data (attached to demo fixtures): lets the UI show
+    // the real legislative timeline of the text under discussion.
+    timeline: (result as PipelineResultWithTimeline).timeline,
+    timeline_title: (result as PipelineResultWithTimeline).timelineTitle,
   });
 });
+
+/** Fixtures may carry an optional real-world legislative timeline. */
+type PipelineResultWithTimeline = Awaited<ReturnType<typeof runPipeline>> & {
+  timeline?: Array<{ label: string; date: string; status: string }>;
+  timelineTitle?: string;
+};
 
 // Streaming chat: emits newline-delimited JSON events (stage / verification /
 // done) so the UI can show the pipeline working live instead of a silent wait.
@@ -73,7 +83,9 @@ app.post("/api/chat/stream", async (c) => {
   c.header("X-Accel-Buffering", "no");
 
   return stream(c, async (s) => {
-    const emit = (event: unknown) => s.write(`${JSON.stringify(event)}\n`);
+    const emit = async (event: unknown) => {
+      await s.write(`${JSON.stringify(event)}\n`);
+    };
     const result = await runPipelineStreaming(body.message, body.profile, conversationId, emit);
 
     const target = body.channel && body.address ? { channel: body.channel, address: body.address } : undefined;
@@ -96,6 +108,23 @@ app.post("/api/draft", async (c) => {
     status: result.status,
     refusal_reason: result.refusalReason,
     suggestions: result.suggestions,
+  });
+});
+
+// Streaming draft: same NDJSON event grammar as /api/chat/stream.
+app.post("/api/draft/stream", async (c) => {
+  const body = await c.req.json<DraftRequestBody>();
+  const conversationId = randomUUID();
+
+  c.header("Content-Type", "application/x-ndjson; charset=utf-8");
+  c.header("Cache-Control", "no-cache, no-transform");
+  c.header("X-Accel-Buffering", "no");
+
+  return stream(c, async (s) => {
+    const emit = async (event: unknown) => {
+      await s.write(`${JSON.stringify(event)}\n`);
+    };
+    await runDraftStreaming(body.intent, body.base_text, conversationId, emit);
   });
 });
 

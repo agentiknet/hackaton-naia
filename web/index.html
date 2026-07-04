@@ -131,30 +131,7 @@
     font-weight: 600;
     color: var(--bleu);
   }
-  .profile-toggle {
-    margin-left: auto;
-    display: flex;
-    background: var(--gris-bg);
-    border-radius: var(--radius);
-    padding: 2px;
-    border: 1px solid var(--gris-border);
-  }
-  .profile-toggle button {
-    border: none;
-    background: transparent;
-    padding: 6px 16px;
-    font-size: 13px;
-    font-family: var(--font);
-    cursor: pointer;
-    border-radius: 4px;
-    color: var(--gris-text);
-    transition: all .15s;
-    font-weight: 500;
-  }
-  .profile-toggle button.active {
-    background: var(--bleu);
-    color: var(--white);
-  }
+  .chat-header .draft-hint { margin-left: auto; }
 
   .chat-messages {
     flex: 1;
@@ -263,6 +240,18 @@
     width: 12px; height: 12px; border: 2px solid var(--bleu);
     border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite;
   }
+  /* Stream of thought: last tool calls under the active step */
+  .step-traces {
+    margin: 2px 0 4px 27px;
+    display: flex; flex-direction: column; gap: 2px;
+    border-left: 2px solid var(--gris-border); padding-left: 9px;
+  }
+  .step-trace {
+    font-size: 11.5px; color: var(--gris-text); opacity: .85;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    animation: toast-in .2s ease-out;
+  }
+  .step-trace:last-child { color: var(--bleu); opacity: 1; }
 
   /* Input area */
   .chat-input-area {
@@ -590,14 +579,38 @@
     padding: 12px 14px;
   }
 
-  /* Right rail: certification (phase 1) stacked over the Conseil audit (phase 2) */
+  /* Right rail: one panel — gauge + legend on top, verifications below */
   .side-rail {
     display: flex;
     flex-direction: column;
     gap: 20px;
     min-height: 0;
   }
-  .side-rail .cert-panel:first-child { max-height: 55vh; }
+  .rail-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 160px);
+    position: sticky;
+    top: 20px;
+  }
+  .rail-panel .cert-body { flex: 0 1 auto; overflow-y: auto; }
+  .rail-panel .audit-content { flex: 1 1 auto; min-height: 140px; }
+  .rail-subhead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-top: 1px solid var(--gris-border);
+    border-bottom: 1px solid var(--gris-border);
+    background: var(--gris-bg);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--bleu);
+  }
+  /* Reverse focus: hovering a claim in the answer lights up its card */
+  .verif-card.card-focus { border-color: var(--bleu); box-shadow: var(--shadow-md); }
   .audit-badge {
     margin-left: auto;
     font-size: 11px;
@@ -760,6 +773,94 @@
     font-size: 13px; line-height: 1.45; color: #1a1a1a;
     background: #fff8e6; border-left: 3px solid #e0a800; border-radius: 4px; padding: 8px 10px;
   }
+
+  /* ─── Suggested questions (empty state) ─── */
+  .suggest-chips {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    max-width: 560px; margin-top: 10px;
+  }
+  .suggest-chip {
+    background: var(--white); border: 1px solid var(--gris-border); border-radius: 20px;
+    padding: 8px 14px; font-size: 13px; color: var(--bleu); cursor: pointer;
+    font-family: var(--font); transition: all .15s; text-align: left;
+  }
+  .suggest-chip:hover { border-color: var(--bleu); background: var(--bleu-light); }
+
+  /* ─── Claim highlighting (score explicable) ─── */
+  .claim-mark {
+    border-radius: 3px; transition: background .25s, box-shadow .25s;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .highlights-on .claim-mark { cursor: pointer; }
+  .highlights-on .claim-supported   { background: var(--vert-light);  box-shadow: 0 2px 0 var(--vert); }
+  .highlights-on .claim-unsupported { background: var(--rouge-light); box-shadow: 0 2px 0 var(--rouge); }
+  .highlights-on .claim-unknown     { background: #f0f0f0;            box-shadow: 0 2px 0 #bbb; }
+  .claim-mark.claim-focus {
+    outline: 2px solid var(--bleu); outline-offset: 1px; background: var(--bleu-light);
+  }
+
+  .claim-legend { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .legend-btn {
+    border: 1px solid var(--gris-border); background: var(--white); border-radius: 20px;
+    padding: 6px 14px; font-size: 12px; font-family: var(--font); cursor: pointer;
+    display: flex; align-items: center; gap: 12px; color: #1a1a1a; transition: all .15s;
+  }
+  .legend-btn:hover { border-color: var(--bleu); }
+  .legend-btn.active { border-color: var(--bleu); background: var(--bleu-light); }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+  .legend-hint { font-size: 11px; color: var(--gris); }
+  .gauge-tier { font-size: 12px; color: var(--gris-text); margin-top: 4px; }
+
+  /* ─── Grouped mentor pills (1 affirmation = N verdicts) ─── */
+  .mentor-pill {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;
+    border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+  }
+  .mentor-pill.supported   { background: var(--vert-light);  color: var(--vert); }
+  .mentor-pill.unsupported { background: var(--rouge-light); color: var(--rouge); }
+  .mentor-pill.unknown     { background: #eee;               color: var(--gris-text); }
+  .verif-card { transition: border-color .15s, box-shadow .15s; }
+  .verif-card:hover { border-color: var(--bleu); box-shadow: var(--shadow); }
+
+  /* ─── Per-answer certification chip (the rail shows ONE answer's audit) ─── */
+  .msg-cert-chip {
+    margin-top: 8px; display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--gris-border); background: var(--white); border-radius: 20px;
+    padding: 3px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: var(--font); color: var(--gris-text); transition: all .15s;
+  }
+  .msg-cert-chip:hover { border-color: var(--bleu); }
+  .msg-cert-chip.active { border-color: var(--bleu); background: var(--white); color: var(--bleu); }
+  .msg-cert-chip .chip-score.ok { color: var(--vert); }
+  .msg-cert-chip .chip-score.ko { color: var(--rouge); }
+  .cert-context {
+    font-size: 12px; color: var(--gris-text); background: var(--gris-bg);
+    border-radius: 4px; padding: 6px 10px; margin-bottom: 14px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* ─── Toasts (problèmes & signaux pipeline) ─── */
+  .toast-stack {
+    position: fixed; top: 70px; right: 20px; z-index: 100;
+    display: flex; flex-direction: column; gap: 8px; max-width: 380px;
+  }
+  .toast {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--white); border: 1px solid var(--gris-border);
+    border-left: 4px solid var(--bleu); border-radius: var(--radius);
+    box-shadow: var(--shadow-md); padding: 10px 12px;
+    font-size: 13px; line-height: 1.4; color: #1a1a1a;
+    animation: toast-in .25s ease-out;
+  }
+  .toast.warn  { border-left-color: #e0a800; }
+  .toast.error { border-left-color: var(--rouge); }
+  .toast .toast-ic { flex: 0 0 auto; font-size: 15px; }
+  .toast .toast-close {
+    margin-left: auto; border: none; background: transparent; cursor: pointer;
+    color: var(--gris); font-size: 15px; font-weight: 700; padding: 0 2px;
+  }
+  .toast.leaving { opacity: 0; transform: translateX(12px); transition: all .25s; }
+  @keyframes toast-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
@@ -790,10 +891,7 @@
   <section class="chat-panel">
     <div class="chat-header">
       <h2>Conversation</h2>
-      <div class="profile-toggle">
-        <button class="active" data-profile="citoyen" title="Comprendre la loi — explication pédagogique et sourcée">Citoyen · comprendre</button>
-        <button data-profile="depute" title="Travailler la loi — précis technique et aide à la rédaction sourcée">Député · rédiger</button>
-      </div>
+      <span class="draft-hint">Explication pédagogique — chaque affirmation vérifiée et sourcée</span>
     </div>
 
     <div class="error-banner" id="errorBanner">
@@ -805,6 +903,12 @@
       <div class="chat-empty" id="chatEmpty">
         <div class="chat-empty-icon">🏛️</div>
         <p>Posez une question sur la loi ou l'activité parlementaire.<br>Naia vérifie chaque affirmation avant de répondre.</p>
+        <div class="suggest-chips">
+          <button class="suggest-chip">Que dit la loi sur l'accélération des énergies renouvelables ?</button>
+          <button class="suggest-chip">L'encadrement des loyers est-il obligatoire partout en France ?</button>
+          <button class="suggest-chip">Où en est la législation sur l'aide à mourir ?</button>
+          <button class="suggest-chip">Comment a évolué le budget de l'éducation nationale ?</button>
+        </div>
       </div>
     </div>
 
@@ -816,40 +920,33 @@
     </div>
   </section>
 
-  <!-- Right rail: two phases — certification then the Conseil's audit -->
+  <!-- Right rail: ONE panel — the Conseil's certification, gauge on top,
+       then the per-affirmation verifications that explain it. -->
   <aside class="side-rail">
-
-    <!-- Phase 1 · Certification -->
-    <div class="cert-panel">
+    <div class="cert-panel rail-panel">
       <div class="cert-header">
         <span class="cert-icon">✓</span>
-        <h2>1 · Certification</h2>
+        <h2>Certification du Conseil</h2>
       </div>
       <div class="cert-body" id="certBody">
         <div class="cert-empty">Les résultats de certification apparaîtront ici après la première réponse.</div>
       </div>
-    </div>
-
-    <!-- Phase 2 · Conseil des Mentors (audit) -->
-    <div class="cert-panel audit-panel">
-      <div class="cert-header">
-        <span class="cert-icon">🔍</span>
-        <h2>2 · Conseil des Mentors</h2>
+      <div class="rail-subhead">
+        <span>🔍 Vérifications des Mentors</span>
         <span class="audit-badge" id="auditBadge" style="display:none">0</span>
       </div>
       <div class="audit-content" id="auditContent">
         <div class="audit-empty" id="auditEmpty">Chaque affirmation est vérifiée indépendamment par les deux mentors — le détail s'affiche ici après la réponse.</div>
       </div>
     </div>
-
   </aside>
 
 </div>
 
-<!-- ═══ Timeline ═══ -->
-<section class="timeline-section">
+<!-- ═══ Timeline — parcours réel du texte discuté (hidden when unknown) ═══ -->
+<section class="timeline-section" id="timelineSection" hidden>
   <div class="timeline-card">
-    <h2>Parcours de la loi</h2>
+    <h2 id="timelineTitle">Parcours de la loi</h2>
     <div class="timeline" id="timeline"></div>
   </div>
 </section>
@@ -900,6 +997,8 @@
   </div>
 </div><!-- /viewRediger -->
 
+<div class="toast-stack" id="toastStack"></div>
+
 <footer class="footer">
   Naia — Hackathon Assemblée Nationale 2026 · Le parcours de la loi : vers une IA de confiance
 </footer>
@@ -915,27 +1014,27 @@ let isDemoMode = false;
 let conversationId = null;
 let isLoading = false;
 
-/* ─── Timeline data (static, data-driven) ─── */
-const TIMELINE_STEPS = [
-  { label: 'Dépôt',      date: '10 jan. 2023', status: 'done' },
-  { label: 'Commission', date: '25 jan. 2023', status: 'done' },
-  { label: 'Séance',     date: '14 fév. 2023', status: 'done' },
-  { label: 'Navette',    date: '05 mars 2023', status: 'current' },
-  { label: 'CMP',        date: '—',             status: 'pending' },
-  { label: 'Promulgation / JO', date: '—',      status: 'pending' },
-];
-
-function renderTimeline() {
-  const container = document.getElementById('timeline');
-  container.innerHTML = TIMELINE_STEPS.map((step, i) => `
-    <div class="timeline-step ${step.status}">
+/* ─── Timeline — real parcours of the law under discussion ───
+   Data comes from the answer payload (data.timeline, attached to fixtures /
+   API results). No data → the whole section stays hidden: we never show an
+   invented parcours in a trust-focused product. */
+function renderTimeline(timeline, title) {
+  const section = document.getElementById('timelineSection');
+  if (!Array.isArray(timeline) || timeline.length === 0) {
+    section.hidden = true;
+    return;
+  }
+  section.hidden = false;
+  document.getElementById('timelineTitle').textContent =
+    title ? `Parcours de la loi — ${title}` : 'Parcours de la loi';
+  document.getElementById('timeline').innerHTML = timeline.map((step, i) => `
+    <div class="timeline-step ${escapeHtml(step.status || 'pending')}">
       <div class="step-circle">${i + 1}</div>
-      <div class="step-label">${step.label}</div>
-      <div class="step-date">${step.date}</div>
+      <div class="step-label">${escapeHtml(step.label || '')}</div>
+      <div class="step-date">${escapeHtml(step.date || '—')}</div>
     </div>
   `).join('');
 }
-renderTimeline();
 
 /* ─── View tabs ─── */
 document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -945,15 +1044,6 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     const view = tab.dataset.view;
     document.getElementById('viewComprendre').hidden = view !== 'comprendre';
     document.getElementById('viewRediger').hidden = view !== 'rediger';
-  });
-});
-
-/* ─── Profile toggle ─── */
-document.querySelectorAll('.profile-toggle button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.profile-toggle button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentProfile = btn.dataset.profile;
   });
 });
 
@@ -970,6 +1060,14 @@ function updateDemoBadge() {
   const showBadge = isDemoMode;  // error-triggered demo also shows banner separately
   badge.classList.toggle('visible', showBadge);
 }
+
+/* ─── Suggested questions ─── */
+document.querySelectorAll('.suggest-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.getElementById('chatInput').value = chip.textContent.trim();
+    sendMessage();
+  });
+});
 
 /* ─── Enter key to send ─── */
 document.getElementById('chatInput').addEventListener('keydown', (e) => {
@@ -990,6 +1088,12 @@ async function sendMessage() {
 
   // Hide empty state
   document.getElementById('chatEmpty').style.display = 'none';
+
+  // Reset claim-highlight state: live verifications streamed during this turn
+  // must not annotate the PREVIOUS assistant message.
+  lastAssistantEl = null;
+  lastGrouped = [];
+  claimEls = [];
 
   // Render user message
   appendMessage('user', message);
@@ -1013,24 +1117,19 @@ async function sendMessage() {
     }
 
     removeSpinner();
-    renderAssistantMessage(data);
-    renderCertification(data);
-
-    // Store conversationId, then surface the Conseil's audit in the right rail
-    if (data.conversation_id) conversationId = data.conversation_id;
-    loadAudit(data);
+    const msgEl = renderAssistantMessage(data);
+    registerTurn(message, data, msgEl);
 
   } catch (err) {
     removeSpinner();
     showErrorBanner();
+    toast('error', 'Serveur Naia injoignable — bascule sur les données d\'exemple.');
     // Fallback to demo data
     await fakeDelay(600);
     const data = getDemoResponse(message, currentProfile);
     setDemoBadgeVisible(true);
-    renderAssistantMessage(data);
-    renderCertification(data);
-    if (data.conversation_id) conversationId = data.conversation_id;
-    loadAudit(data);
+    const msgEl = renderAssistantMessage(data);
+    registerTurn(message, data, msgEl);
   }
 
   isLoading = false;
@@ -1055,7 +1154,7 @@ async function submitDraft() {
   btn.textContent = 'Le Conseil rédige et vérifie…';
 
   const out = document.getElementById('draftOutput');
-  out.innerHTML = '<div class="audit-loading"><div class="spinner"></div>Naia rédige, le Conseil des Mentors vérifie chaque référence…</div>';
+  out.innerHTML = '<div class="steps-msg" id="draftSteps"></div>';
   document.getElementById('draftSuggestions').innerHTML = '';
 
   try {
@@ -1065,13 +1164,7 @@ async function submitDraft() {
       data = getDemoDraft(intent);
       setDemoBadgeVisible(true);
     } else {
-      const res = await fetch(API_BASE + '/api/draft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intent, base_text: baseText || undefined }),
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      data = await res.json();
+      data = normalizeDraftResult(await streamDraft(intent, baseText));
       setDemoBadgeVisible(false);
     }
     renderDraft(data);
@@ -1080,12 +1173,103 @@ async function submitDraft() {
     const data = getDemoDraft(intent);
     setDemoBadgeVisible(true);
     showErrorBanner();
+    toast('error', 'Serveur Naia injoignable — bascule sur les données d\'exemple.');
     renderDraft(data);
   }
 
   isDrafting = false;
   btn.disabled = false;
   btn.textContent = 'Rédiger et certifier';
+}
+
+/* Drafting pipeline steps (streaming) — same grammar as the chat stream. */
+const DRAFT_STEP_DEFS = [
+  { key: 'draft',   icon: '✍️', label: 'Naia rédige le texte législatif' },
+  { key: 'extract', icon: '🔎', label: 'Extraction des références à vérifier' },
+  { key: 'verify',  icon: '⚖️', label: 'Le Conseil des Mentors vérifie' },
+  { key: 'suggest', icon: '💡', label: 'Suggestions légistiques du Conseil' },
+  { key: 'certify', icon: '🏛️', label: 'Certification' },
+];
+
+function normalizeDraftResult(r) {
+  if (!r) throw new Error('empty draft result');
+  return {
+    ...r,
+    conversation_id: r.conversationId ?? r.conversation_id,
+    confidence_score: r.confidenceScore ?? r.confidence_score ?? 0,
+    refusal_reason: r.refusalReason ?? r.refusal_reason,
+  };
+}
+
+async function streamDraft(intent, baseText) {
+  const stepsEl = document.getElementById('draftSteps');
+  const state = { verifDone: 0, verifTotal: 0, claimCount: null, traces: [] };
+  DRAFT_STEP_DEFS.forEach(d => { state[d.key] = 'pending'; });
+  renderStepsInto(stepsEl, DRAFT_STEP_DEFS, state);
+
+  const res = await fetch(API_BASE + '/api/draft/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ intent, base_text: baseText || undefined }),
+  });
+  if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '', finalResult = null;
+
+  const activate = (key) => {
+    let passed = false;
+    for (const d of DRAFT_STEP_DEFS) {
+      if (d.key === key) { state[key] = 'active'; passed = true; }
+      else if (!passed) state[d.key] = 'done';
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (!line) continue;
+      let ev; try { ev = JSON.parse(line); } catch { continue; }
+      if (ev.type === 'stage') {
+        if (ev.key === 'retry') {
+          state.retry = true;
+          state.claimCount = null;
+          state.verifTotal = 0;
+          state.verifDone = 0;
+          DRAFT_STEP_DEFS.forEach(d => { state[d.key] = 'pending'; });
+          state.draft = 'active';
+          toast('info', 'Le Conseil a rejeté le premier jet — reformulation en cours (tentative 2/2).');
+        } else {
+          activate(ev.key);
+          if (ev.key === 'extract') {
+            state.claimCount = ev.count ?? null;
+            state.verifTotal = (ev.count || 0) * 2;
+          }
+        }
+        state.traces = [];
+      } else if (ev.type === 'trace') {
+        state.traces.push(ev.label);
+      } else if (ev.type === 'verification') {
+        state.verifDone += 1;
+        if (ev.verification && ev.verification.error && /timeout/i.test(ev.verification.error)) {
+          toast('warn', 'Une source officielle répond lentement — certaines vérifications ont expiré.');
+        }
+      } else if (ev.type === 'done') {
+        finalResult = ev.result;
+        if (ev.result && ev.result.status === 'insufficient') {
+          toast('warn', 'Sources partiellement indisponibles — la rédaction n\'a pas pu être certifiée.');
+        }
+      }
+      renderStepsInto(stepsEl, DRAFT_STEP_DEFS, state);
+    }
+  }
+  return finalResult;
 }
 
 function renderDraft(data) {
@@ -1138,9 +1322,20 @@ function startSteps() {
 }
 
 function renderSteps(state) {
-  const el = document.getElementById('pipelineSteps');
+  renderStepsInto(document.getElementById('pipelineSteps'), STEP_DEFS, state);
+}
+
+function renderStepsInto(el, defs, state) {
   if (!el) return;
-  el.innerHTML = STEP_DEFS.map(def => {
+  const retryRow = state.retry
+    ? '<div class="step-row done"><span class="step-ic">🔁</span><span class="step-tx">Le Conseil a demandé une reformulation — tentative 2/2</span></div>'
+    : '';
+  // Stream of thought: last tool calls, shown under the active step.
+  const traces = (state.traces && state.traces.length)
+    ? `<div class="step-traces">${state.traces.slice(-4).map(t =>
+        `<div class="step-trace">${escapeHtml(t)}</div>`).join('')}</div>`
+    : '';
+  el.innerHTML = retryRow + defs.map(def => {
     const st = state[def.key] || 'pending';
     let extra = '';
     if (def.key === 'extract' && state.claimCount != null) {
@@ -1151,7 +1346,8 @@ function renderSteps(state) {
     }
     const mark = st === 'done' ? '✓' : def.icon;
     const spin = st === 'active' ? '<span class="mini-spinner"></span>' : '';
-    return `<div class="step-row ${st}"><span class="step-ic">${mark}</span><span class="step-tx">${def.label}${extra}</span>${spin}</div>`;
+    const row = `<div class="step-row ${st}"><span class="step-ic">${mark}</span><span class="step-tx">${def.label}${extra}</span>${spin}</div>`;
+    return st === 'active' ? row + traces : row;
   }).join('');
 }
 
@@ -1168,6 +1364,8 @@ function normalizeResult(r) {
     refusal_reason: r.refusalReason ?? r.refusal_reason,
     verifications: r.verifications || [],
     claims: r.claims || [],
+    timeline: r.timeline,
+    timeline_title: r.timelineTitle ?? r.timeline_title,
   };
 }
 
@@ -1208,19 +1406,46 @@ async function streamChat(message, state) {
       if (!line) continue;
       let ev; try { ev = JSON.parse(line); } catch { continue; }
       if (ev.type === 'stage') {
-        activate(ev.key);
-        if (ev.key === 'extract') {
-          state.claimCount = ev.count ?? null;
-          state.verifTotal = (ev.count || 0) * 2;
+        if (ev.key === 'retry') {
+          // Attempt 2: the Conseil rejected attempt 1 — reset steps and the
+          // live verification list, and say so instead of looking stuck.
+          state.retry = true;
+          state.claimCount = null;
+          state.verifTotal = 0;
+          state.verifDone = 0;
+          liveVerifs.length = 0;
+          STEP_DEFS.forEach(d => { state[d.key] = 'pending'; });
+          state.draft = 'active';
+          document.getElementById('auditContent').innerHTML =
+            '<div class="audit-empty">Reformulation en cours — le Conseil re-vérifiera la nouvelle rédaction…</div>';
+          document.getElementById('auditBadge').style.display = 'none';
+          toast('info', 'Le Conseil a rejeté la première rédaction — reformulation en cours (tentative 2/2).');
+        } else {
+          activate(ev.key);
+          if (ev.key === 'extract') {
+            state.claimCount = ev.count ?? null;
+            state.verifTotal = (ev.count || 0) * 2;
+          }
         }
+        state.traces = [];   // thought lines belong to the step that emitted them
+        renderSteps(state);
+      } else if (ev.type === 'trace') {
+        (state.traces = state.traces || []).push(ev.label);
         renderSteps(state);
       } else if (ev.type === 'verification') {
         liveVerifs.push(ev.verification);
         state.verifDone = liveVerifs.length;
         renderSteps(state);
         renderAudit({ verifications: liveVerifs });
+        // Surface source slowness the moment it happens (dedup'd by message).
+        if (ev.verification && ev.verification.error && /timeout/i.test(ev.verification.error)) {
+          toast('warn', 'Une source officielle répond lentement — certaines vérifications ont expiré.');
+        }
       } else if (ev.type === 'done') {
         finalResult = ev.result;
+        if (ev.result && ev.result.status === 'insufficient') {
+          toast('warn', 'Sources partiellement indisponibles — la réponse n\'a pas pu être certifiée.');
+        }
       }
     }
   }
@@ -1231,6 +1456,23 @@ async function streamChat(message, state) {
 
 function showErrorBanner() {
   document.getElementById('errorBanner').classList.add('visible');
+}
+
+/* ─── Toasts ─── */
+const TOAST_ICONS = { info: 'ℹ️', warn: '⚠️', error: '⛔' };
+
+function toast(type, message, ms = 6000) {
+  const stack = document.getElementById('toastStack');
+  // Dedup: don't stack the same message twice.
+  if ([...stack.children].some(t => t.dataset.msg === message)) return;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.dataset.msg = message;
+  el.innerHTML = `<span class="toast-ic">${TOAST_ICONS[type] || 'ℹ️'}</span><span>${escapeHtml(message)}</span><button class="toast-close" aria-label="Fermer">×</button>`;
+  const close = () => { el.classList.add('leaving'); setTimeout(() => el.remove(), 250); };
+  el.querySelector('.toast-close').addEventListener('click', close);
+  stack.appendChild(el);
+  setTimeout(close, ms);
 }
 
 function setDemoBadgeVisible(v) {
@@ -1254,6 +1496,7 @@ function renderAssistantMessage(data) {
   content.className = 'msg-content';
   content.innerHTML = formatMarkdown(data.response || '');
   el.appendChild(content);
+  lastAssistantEl = content;   // target for claim highlighting
 
   // Inline sources (compact)
   if (data.sources && data.sources.length > 0 && !isRefused) {
@@ -1267,6 +1510,42 @@ function renderAssistantMessage(data) {
 
   document.getElementById('chatMessages').appendChild(el);
   scrollChat();
+  return el;
+}
+
+/* ─── Per-turn certification: the right rail always shows ONE answer ───
+   Each assistant message carries a score chip; clicking it reloads that
+   answer's certification + audit into the rail (and its claim highlights). */
+let turns = [];
+let activeQuestion = null;
+
+function registerTurn(question, data, msgEl) {
+  const idx = turns.length;
+  turns.push({ question, data, contentEl: lastAssistantEl, chipEl: null });
+
+  const chip = document.createElement('button');
+  chip.className = 'msg-cert-chip';
+  const icon = data.status === 'refused' ? '✕' : data.status === 'insufficient' ? '◐' : '✓';
+  const cls = data.status === 'refused' ? 'ko' : data.status === 'insufficient' ? '' : 'ok';
+  chip.innerHTML = `<span class="chip-score ${cls}">${icon} ${data.confidence_score ?? 0}</span><span>· Conseil</span>`;
+  chip.title = "Voir la certification et l'audit de cette réponse";
+  chip.addEventListener('click', () => selectTurn(idx));
+  msgEl.appendChild(chip);
+  turns[idx].chipEl = chip;
+
+  selectTurn(idx);
+}
+
+function selectTurn(idx) {
+  const t = turns[idx];
+  if (!t) return;
+  activeQuestion = t.question;
+  turns.forEach((x, i) => { if (x.chipEl) x.chipEl.classList.toggle('active', i === idx); });
+  lastAssistantEl = t.contentEl;
+  if (t.data.conversation_id) conversationId = t.data.conversation_id;
+  renderCertification(t.data);
+  loadAudit(t.data);
+  renderTimeline(t.data.timeline, t.data.timeline_title || t.data.timelineTitle);
 }
 
 function scrollChat() {
@@ -1288,15 +1567,6 @@ function renderCertification(data, bodyId = 'certBody') {
   let arcColor = '#e1000f';       // red
   if (score >= 70) arcColor = '#18753c';  // green
   else if (score >= 40) arcColor = '#000091'; // blue
-
-  // Gauge SVG (semicircle)
-  const angle = (score / 100) * 180;
-  const r = 70, cx = 80, cy = 80;
-  const rad = (180 - angle) * Math.PI / 180;
-  const x = cx + r * Math.cos(rad);
-  const y = cy - r * Math.sin(rad);
-  const largeArc = angle > 180 ? 1 : 0;
-  const arcPath = `M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${x} ${y}`;
 
   const statusLabel = status === 'refused'
     ? '<span class="gauge-status refused">Réponse refusée</span>'
@@ -1323,18 +1593,26 @@ function renderCertification(data, bodyId = 'certBody') {
       </div>`;
   }
 
-  // Gauge
+  // Reliability tier — makes the number interpretable at a glance.
+  const tier = status === 'refused' ? '' :
+    score >= 70 ? 'Fiabilité élevée — vérifiée contre les sources officielles'
+    : score >= 40 ? 'Fiabilité moyenne — certaines affirmations non vérifiées'
+    : 'Fiabilité faible — la plupart des affirmations non vérifiées';
+
+  // Gauge (arc + value animated after insertion, see animateGauge)
   html += `
     <div class="gauge-container">
       <svg class="gauge-svg" width="160" height="100" viewBox="0 0 160 100">
-        <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}"
+        <path d="M 10 80 A 70 70 0 0 1 150 80"
               fill="none" stroke="#e8e8e8" stroke-width="10" stroke-linecap="round"/>
-        <path d="${arcPath}"
+        <path class="gauge-arc" d="${gaugeArcD(0)}"
               fill="none" stroke="${arcColor}" stroke-width="10" stroke-linecap="round"/>
-        <text class="gauge-value" x="${cx}" y="${cy - 8}" text-anchor="middle">${score}</text>
-        <text class="gauge-label" x="${cx}" y="${cy + 10}" text-anchor="middle">/ 100</text>
+        <text class="gauge-value" x="80" y="72" text-anchor="middle">0</text>
+        <text class="gauge-label" x="80" y="90" text-anchor="middle">/ 100</text>
       </svg>
       ${statusLabel}
+      ${tier ? `<div class="gauge-tier">${tier}</div>` : ''}
+      ${bodyId === 'certBody' ? '<div class="claim-legend" id="claimLegend"></div>' : ''}
     </div>`;
 
   // Sources
@@ -1353,7 +1631,41 @@ function renderCertification(data, bodyId = 'certBody') {
   }
   html += '</div>';
 
+  // Scope marker: the rail certifies ONE answer, not the whole conversation.
+  if (bodyId === 'certBody' && activeQuestion) {
+    html = `<div class="cert-context" title="${escapeHtml(activeQuestion)}">Réponse à : « ${escapeHtml(activeQuestion)} »</div>` + html;
+  }
+
   body.innerHTML = html;
+  animateGauge(body, score);
+  updateClaimLegend();
+}
+
+/* Gauge geometry + count-up animation */
+function gaugeArcD(score) {
+  const r = 70, cx = 80, cy = 80;
+  const angle = Math.max(0.8, (score / 100) * 180);
+  const rad = (180 - angle) * Math.PI / 180;
+  const x = cx + r * Math.cos(rad);
+  const y = cy - r * Math.sin(rad);
+  return `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${x} ${y}`;
+}
+
+function animateGauge(body, score) {
+  const path = body.querySelector('.gauge-arc');
+  const txt = body.querySelector('.gauge-value');
+  if (!path || !txt) return;
+  const dur = 800;
+  const start = performance.now();
+  function frame(t) {
+    const p = Math.min(1, (t - start) / dur);
+    const ease = 1 - Math.pow(1 - p, 3);   // ease-out cubic
+    const s = score * ease;
+    path.setAttribute('d', gaugeArcD(s));
+    txt.textContent = Math.round(s);
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 
 /* ═══════════════════════════════════════════════
@@ -1366,6 +1678,13 @@ async function loadAudit(preloaded) {
   // Fast path: the chat/draft response already carried verifications.
   if (preloaded && Array.isArray(preloaded.verifications) && preloaded.verifications.length) {
     renderAudit(preloaded);
+    return;
+  }
+
+  // A refused answer with no verifications must not be backfilled with the
+  // generic demo audit — it would contradict the refusal banner.
+  if (preloaded && preloaded.status === 'refused') {
+    renderAudit({ verifications: [] });
     return;
   }
 
@@ -1391,6 +1710,51 @@ async function loadAudit(preloaded) {
   }
 }
 
+/* State for claim highlighting (score explicable) */
+let lastAssistantEl = null;   // .msg-content of the latest assistant answer
+let lastGrouped = [];         // grouped verifications [{claim, verdict, entries}]
+let claimEls = [];            // claim index → matched element in the answer
+
+function normText(s) {
+  return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+/* Normalize one verification — the API sends claim/source as objects and
+   durationMs (camelCase); demo/legacy shapes send strings. */
+function normalizeVerif(v) {
+  const claimObj = v.claim ?? v.claim_text ?? v.text;
+  const claim = (claimObj && typeof claimObj === 'object' ? claimObj.text : claimObj) || '—';
+  const mentorRaw = v.mentor || v.mentor_type || v.role || '—';
+  const mentor = { 'mentor-juriste': 'Juriste', 'mentor-parlement': 'Parlement' }[mentorRaw] || mentorRaw;
+  const srcObj = v.source ?? v.citation ?? v.source_ref;
+  const source = (srcObj && typeof srcObj === 'object' ? (srcObj.label || srcObj.ref || srcObj.url) : srcObj) || null;
+  const ms = v.durationMs ?? v.duration_ms;
+  const duration = ms != null
+    ? (ms < 1000 ? ms + ' ms' : (ms / 1000).toFixed(1) + ' s')
+    : (v.duration || '');
+  return { claim, mentor, verdict: v.verdict || 'unknown', source, duration };
+}
+
+/* Combined verdict for a claim verified by several mentors:
+   any refutation wins, then any confirmation, else unknown. */
+function combinedVerdict(entries) {
+  if (entries.some(e => e.verdict === 'unsupported')) return 'unsupported';
+  if (entries.some(e => e.verdict === 'supported')) return 'supported';
+  return 'unknown';
+}
+
+/* Group verifications by claim text → one card per affirmation. */
+function groupVerifs(verifications) {
+  const map = new Map();
+  verifications.forEach(v => {
+    const n = normalizeVerif(v);
+    const key = normText(n.claim);
+    if (!map.has(key)) map.set(key, { claim: n.claim, entries: [] });
+    map.get(key).entries.push(n);
+  });
+  return [...map.values()].map(g => ({ ...g, verdict: combinedVerdict(g.entries) }));
+}
+
 function renderAudit(data) {
   const content = document.getElementById('auditContent');
 
@@ -1403,50 +1767,148 @@ function renderAudit(data) {
     verifications = data.verifications || data.claims.map(c => ({ claim: c.text || c.claim || c }));
   }
 
+  const groups = groupVerifs(verifications);
+  lastGrouped = groups;
+
   // Update badge
   const badge = document.getElementById('auditBadge');
-  if (verifications.length > 0) {
-    badge.textContent = verifications.length + ' vérif.';
+  if (groups.length > 0) {
+    badge.textContent = `${groups.length} affirmation${groups.length > 1 ? 's' : ''} · ${verifications.length} vérif.`;
     badge.style.display = 'inline-block';
   } else {
     badge.style.display = 'none';
   }
 
-  if (verifications.length === 0) {
+  if (groups.length === 0) {
     content.innerHTML = '<div class="audit-empty">Aucune vérification enregistrée pour cette conversation.</div>';
+    claimEls = [];
+    updateClaimLegend();   // clear a stale legend from the previous turn
     return;
   }
 
-  // Compact cards (the rail is narrow — a 5-column table would not fit).
-  const cards = verifications.map(v => {
-    const verdict = v.verdict || 'unknown';
-    const verdictLabel = { supported: 'Confirmé', unsupported: 'Réfuté', unknown: 'Non vérifié' }[verdict] || verdict;
-    // The API sends claim/source as objects and durationMs (camelCase);
-    // demo/legacy shapes send strings. Normalize both.
-    const claimObj = v.claim ?? v.claim_text ?? v.text;
-    const claim = (claimObj && typeof claimObj === 'object' ? claimObj.text : claimObj) || '—';
-    const mentorRaw = v.mentor || v.mentor_type || v.role || '—';
-    const mentor = { 'mentor-juriste': 'Juriste', 'mentor-parlement': 'Parlement' }[mentorRaw] || mentorRaw;
-    const srcObj = v.source ?? v.citation ?? v.source_ref;
-    const source = (srcObj && typeof srcObj === 'object' ? (srcObj.label || srcObj.ref || srcObj.url) : srcObj) || null;
-    const ms = v.durationMs ?? v.duration_ms;
-    const duration = ms != null
-      ? (ms < 1000 ? ms + ' ms' : (ms / 1000).toFixed(1) + ' s')
-      : (v.duration || '');
-
+  // One compact card per AFFIRMATION, with one pill per mentor verdict.
+  const pillIcon = { supported: '✓', unsupported: '✕', unknown: '?' };
+  const pillLabel = { supported: 'confirmé', unsupported: 'réfuté', unknown: 'non vérifié' };
+  const cards = groups.map((g, i) => {
+    const pills = g.entries.map(e =>
+      `<span class="mentor-pill ${escapeHtml(e.verdict)}" title="${escapeHtml(e.mentor)} · ${pillLabel[e.verdict] || e.verdict}${e.duration ? ' · ' + e.duration : ''}">${pillIcon[e.verdict] || ''} ${escapeHtml(e.mentor)}</span>`
+    ).join('');
+    // Show the most informative source: prefer the confirming mentor's.
+    const best = g.entries.find(e => e.verdict === 'supported' && e.source) || g.entries.find(e => e.source);
+    const durations = g.entries.map(e => e.duration).filter(Boolean);
     return `
-      <div class="verif-card verdict-${escapeHtml(verdict)}">
-        <div class="verif-claim">${escapeHtml(claim)}</div>
+      <div class="verif-card verdict-${escapeHtml(g.verdict)}" data-gidx="${i}">
+        <div class="verif-claim">${escapeHtml(g.claim)}</div>
         <div class="verif-meta">
-          <span class="verif-mentor">${escapeHtml(mentor)}</span>
-          <span class="verdict-badge verdict-${escapeHtml(verdict)}">${verdictLabel}</span>
-          ${duration ? `<span class="verif-dur">${escapeHtml(String(duration))}</span>` : ''}
+          ${pills}
+          ${durations.length ? `<span class="verif-dur">${escapeHtml(durations[durations.length - 1])}</span>` : ''}
         </div>
-        ${source ? `<div class="verif-source">${escapeHtml(String(source))}</div>` : ''}
+        ${best && best.source ? `<div class="verif-source">${escapeHtml(String(best.source))}</div>` : ''}
       </div>`;
   }).join('');
 
   content.innerHTML = `<div class="verif-list">${cards}</div>`;
+
+  // Hover a card → spotlight the matching passage in the answer.
+  content.querySelectorAll('.verif-card').forEach(card => {
+    const i = +card.dataset.gidx;
+    card.addEventListener('mouseenter', () => focusClaim(i, true));
+    card.addEventListener('mouseleave', () => focusClaim(i, false));
+  });
+
+  annotateClaims();
+  updateClaimLegend();
+}
+
+/* ─── Score explicable : map each claim onto the answer's paragraphs ─── */
+function annotateClaims() {
+  claimEls = [];
+  if (!lastAssistantEl || lastGrouped.length === 0) return;
+  // Finest available granularity: sentences when the paragraph was split,
+  // whole paragraphs otherwise, list items as-is.
+  const els = [...lastAssistantEl.querySelectorAll('.md-s, .md-p, .md-ul li')]
+    .filter(e => !(e.classList.contains('md-p') && e.querySelector('.md-s')));
+  els.forEach(e => {
+    e.classList.remove('claim-mark', 'claim-supported', 'claim-unsupported', 'claim-unknown', 'claim-focus');
+  });
+  const tokens = s => new Set(normText(s).split(/\W+/).filter(w => w.length > 3));
+  const elTokens = els.map(e => tokens(e.textContent));
+  const rank = { unsupported: 3, unknown: 2, supported: 1 };  // worst verdict wins per element
+
+  lastGrouped.forEach((g, idx) => {
+    const ct = tokens(g.claim);
+    if (ct.size === 0) return;
+    let best = -1, bestScore = 0;
+    elTokens.forEach((et, i) => {
+      let inter = 0;
+      ct.forEach(w => { if (et.has(w)) inter++; });
+      const score = inter / ct.size;
+      if (score > bestScore) { bestScore = score; best = i; }
+    });
+    if (best >= 0 && bestScore >= 0.3) {
+      const el = els[best];
+      const current = ['claim-unsupported', 'claim-unknown', 'claim-supported'].find(c => el.classList.contains(c));
+      const currentRank = current ? rank[current.replace('claim-', '')] : 0;
+      if (rank[g.verdict] > currentRank) {
+        el.classList.remove('claim-supported', 'claim-unsupported', 'claim-unknown');
+        el.classList.add('claim-mark', 'claim-' + g.verdict);
+      } else {
+        el.classList.add('claim-mark');
+      }
+      claimEls[idx] = el;
+      // Reverse link: hover a claim in the answer → its verification card
+      // lights up; click → scroll the card (and its source) into view.
+      // Plain property assignment keeps this idempotent across re-annotations.
+      el.onmouseenter = () => focusCard(idx, true);
+      el.onmouseleave = () => focusCard(idx, false);
+      el.onclick = () => {
+        const card = document.querySelector(`.verif-card[data-gidx="${idx}"]`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        focusCard(idx, true);
+        setTimeout(() => focusCard(idx, false), 1600);
+      };
+    }
+  });
+
+  // Highlights on by default — the score becomes self-explanatory.
+  lastAssistantEl.classList.add('highlights-on');
+}
+
+function focusClaim(idx, on) {
+  const el = claimEls[idx];
+  if (!el) return;
+  el.classList.toggle('claim-focus', on);
+  if (on) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function focusCard(idx, on) {
+  const card = document.querySelector(`.verif-card[data-gidx="${idx}"]`);
+  if (card) card.classList.toggle('card-focus', on);
+}
+
+function updateClaimLegend() {
+  const holder = document.getElementById('claimLegend');
+  if (!holder) return;
+  if (lastGrouped.length === 0) { holder.innerHTML = ''; return; }
+  const c = { supported: 0, unsupported: 0, unknown: 0 };
+  lastGrouped.forEach(g => { c[g.verdict] = (c[g.verdict] || 0) + 1; });
+  const on = !!(lastAssistantEl && lastAssistantEl.classList.contains('highlights-on'));
+  const part = (n, color, label) => n > 0
+    ? `<span><span class="legend-dot" style="background:${color}"></span>${n} ${label}${n > 1 ? 's' : ''}</span>`
+    : '';
+  holder.innerHTML = `
+    <button class="legend-btn${on ? ' active' : ''}" onclick="toggleHighlights(this)">
+      ${part(c.supported, 'var(--vert)', 'confirmée')}
+      ${part(c.unsupported, 'var(--rouge)', 'réfutée')}
+      ${part(c.unknown, '#bbb', 'non vérifiée')}
+    </button>
+    <div class="legend-hint">Cliquer pour situer chaque affirmation dans la réponse</div>`;
+}
+
+function toggleHighlights(btn) {
+  if (!lastAssistantEl) return;
+  const on = lastAssistantEl.classList.toggle('highlights-on');
+  btn.classList.toggle('active', on);
 }
 
 function escapeHtml(str) {
@@ -1470,10 +1932,20 @@ function formatMarkdown(str) {
     if (h) { closeList(); out.push(`<h4 class="md-h">${h[2]}</h4>`); }
     else if (li) { if (!inList) { out.push('<ul class="md-ul">'); inList = true; } out.push(`<li>${li[1]}</li>`); }
     else if (line.trim() === '') { closeList(); }
-    else { closeList(); out.push(`<p class="md-p">${line}</p>`); }
+    else { closeList(); out.push(`<p class="md-p">${sentenceSpans(line)}</p>`); }
   }
   closeList();
   return out.join('');
+}
+
+/* Wrap each sentence of a paragraph in a span, so claim highlighting can
+   target individual sentences instead of tinting whole paragraphs. Operates
+   on already-escaped HTML: split points only occur in text (tags contain no
+   ". " sequences), and the guard avoids "art." / "L." style abbreviations. */
+function sentenceSpans(html) {
+  const parts = html.split(/(?<=[.!?»])(?<!\bart\.)(?<![A-Z]\.)\s+(?=[A-ZÀ-ÖØ-Þ«])/g);
+  if (parts.length <= 1) return html;
+  return parts.map(p => `<span class="md-s">${p}</span>`).join(' ');
 }
 
 /* ═══════════════════════════════════════════════
