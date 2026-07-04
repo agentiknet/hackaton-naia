@@ -9,6 +9,7 @@ import { mastra } from "./mastra/index.js";
 import { mentorJuristeAgent } from "./mastra/agents/mentor-juriste/index.js";
 import { mentorParlementAgent } from "./mastra/agents/mentor-parlement/index.js";
 import type { Profile } from "./mentors/types.js";
+import { notifyCertified } from "./notify/agentpush.js";
 import { extractClaims } from "./pipeline/claims.js";
 import { runPipeline } from "./pipeline/index.js";
 import { verifyClaim } from "./pipeline/verify.js";
@@ -19,6 +20,10 @@ interface ChatRequestBody {
   user_id: string;
   message: string;
   profile: Profile;
+  // Optional push target: naia keeps no contact book, so the caller supplies
+  // where a certified answer should be delivered (agentpush). Omit to skip.
+  channel?: string;
+  address?: string;
 }
 
 interface VerifyRequestBody {
@@ -36,12 +41,18 @@ app.post("/api/chat", async (c) => {
 
   const result = await runPipeline(body.message, body.profile, conversationId);
 
+  // Dogfood: push the certified answer out-of-band (Telegram/mail) without
+  // blocking the HTTP response. No-ops unless certified + env + target present.
+  const target = body.channel && body.address ? { channel: body.channel, address: body.address } : undefined;
+  void notifyCertified(body.message, result, target);
+
   return c.json({
     conversation_id: result.conversationId,
     response: result.response,
     sources: result.sources,
     confidence_score: result.confidenceScore,
     status: result.status,
+    refusal_reason: result.refusalReason,
   });
 });
 

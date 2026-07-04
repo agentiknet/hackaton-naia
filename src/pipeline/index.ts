@@ -32,6 +32,9 @@ export interface PipelineResult {
   sources: Source[];
   confidenceScore: number;
   status: PipelineStatus;
+  /** Human-readable justification when status !== "answered" (why it wasn't
+   * certified: contradiction, missing sources, or no verifiable claim). */
+  refusalReason?: string;
   claims: Claim[];
   verifications: Verification[];
 }
@@ -116,8 +119,29 @@ function collectSources(summaries: ClaimSummary[]): Source[] {
   return sources;
 }
 
+/** Profile-specific framing: the two audiences want opposite things from the
+ * same certified facts. A citizen wants to *understand* the law (plain-language
+ * explanation); a député/collaborateur wants to *work* the law (technical
+ * précis + a sourced drafting aid — amendment or exposé des motifs). The
+ * certification rule (every claim sourced) is identical for both. */
+function profileFraming(profile: Profile): string {
+  if (profile === "depute") {
+    return [
+      "Destinataire : député ou collaborateur parlementaire (usage professionnel).",
+      "Réponds de façon technique et dense : références précises (article, texte, dossier, scrutin, dates, état VIGUEUR/ABROGÉ).",
+      "Quand la question appelle un travail législatif (amendement, rédaction, analyse), tu peux proposer une rédaction structurée",
+      "(dispositif + exposé sommaire) — mais chaque élément factuel qui la fonde doit rester sourcé et vérifiable.",
+    ].join("\n");
+  }
+  return [
+    "Destinataire : citoyen qui s'informe.",
+    "Explique en langage clair et pédagogique, sans jargon inutile : ce que dit la loi, ce que ça change concrètement.",
+    "Garde chaque affirmation factuelle sourcée (article, texte, date) : la pédagogie ne dispense jamais de la référence.",
+  ].join("\n");
+}
+
 function buildNaiaPrompt(question: string, profile: Profile): string {
-  return `Profil de l'utilisateur : ${profile}\n\nQuestion : ${question}`;
+  return `${profileFraming(profile)}\n\nQuestion : ${question}`;
 }
 
 function buildRetryPrompt(question: string, profile: Profile, draft: string, summaries: ClaimSummary[]): string {
@@ -131,7 +155,8 @@ function buildRetryPrompt(question: string, profile: Profile, draft: string, sum
     .join("\n");
 
   return [
-    `Profil de l'utilisateur : ${profile}`,
+    profileFraming(profile),
+    "",
     `Question : ${question}`,
     "",
     "Ta première réponse était :",
@@ -148,15 +173,61 @@ function buildRetryPrompt(question: string, profile: Profile, draft: string, sum
   ].join("\n");
 }
 
+const OFFICIAL_SOURCES_HINT =
+  "Vous pouvez consulter directement les sources officielles (Assemblée nationale, Sénat, Légifrance).";
+
+/** One-line, machine-friendly reason for a non-certified answer — surfaced in
+ * the API response (`refusal_reason`) so the UI can explain the *why*, not just
+ * the *what*. Distinguishes contradiction, missing sources, and "no verifiable
+ * claim extracted" (the empty-summaries case). */
+function buildRefusalReason(summaries: ClaimSummary[]): string {
+  const contradicted = summaries.filter((s) => s.verdict === "unsupported").length;
+  const unverifiable = summaries.filter((s) => s.verdict === "unknown").length;
+
+  if (summaries.length === 0) {
+    return "Aucune affirmation factuelle vérifiable n'a pu être extraite de cette question (opinion, projection ou hypothèse hors du champ des sources officielles).";
+  }
+  const parts: string[] = [];
+  if (contradicted > 0) {
+    parts.push(`${contradicted} affirmation(s) contredite(s) par les sources officielles`);
+  }
+  if (unverifiable > 0) {
+    parts.push(`${unverifiable} affirmation(s) sans source vérifiable (LEGI, JORF, dossiers parlementaires, scrutins)`);
+  }
+  return parts.length > 0
+    ? `${parts.join(" ; ")}. Le score de confiance est resté sous le seuil requis.`
+    : "Le score de confiance est resté sous le seuil requis pour une certification.";
+}
+
 function buildRefusalMessage(summaries: ClaimSummary[]): string {
-  const problematic = summaries.filter((s) => s.verdict !== "supported");
-  const lines = problematic.map((s) => `- « ${s.claim.text} »`);
-  return [
+  const contradicted = summaries.filter((s) => s.verdict === "unsupported");
+  const unverifiable = summaries.filter((s) => s.verdict === "unknown");
+
+  if (summaries.length === 0) {
+    return [
+      "Je ne peux pas répondre de façon certifiée à cette question.",
+      "Elle n'appelle aucune affirmation factuelle que je puisse vérifier contre les sources officielles (elle relève d'une opinion, d'une projection ou d'une hypothèse).",
+      "Reformulez-la autour d'un texte, d'un article ou d'un scrutin précis, et je vérifierai chaque affirmation avant de répondre.",
+    ].join("\n");
+  }
+
+  const blocks: string[] = [
     "Je ne peux pas certifier cette réponse avec suffisamment de confiance pour vous la transmettre.",
-    "Les affirmations suivantes n'ont pas pu être confirmées par le Conseil des Mentors :",
-    ...lines,
-    "Reformulez votre question ou consultez directement les sources officielles (Assemblée nationale, Sénat, Légifrance).",
-  ].join("\n");
+  ];
+  if (contradicted.length > 0) {
+    blocks.push(
+      "Affirmations contredites par les sources officielles :",
+      ...contradicted.map((s) => `- « ${s.claim.text} »`),
+    );
+  }
+  if (unverifiable.length > 0) {
+    blocks.push(
+      "Affirmations pour lesquelles aucune source n'a pu être trouvée :",
+      ...unverifiable.map((s) => `- « ${s.claim.text} »`),
+    );
+  }
+  blocks.push(`Reformulez votre question ou consultez les sources. ${OFFICIAL_SOURCES_HINT}`);
+  return blocks.join("\n");
 }
 
 function buildInsufficientMessage(summaries: ClaimSummary[]): string {
@@ -166,7 +237,7 @@ function buildInsufficientMessage(summaries: ClaimSummary[]): string {
     "Les sources nécessaires pour vérifier cette réponse sont partiellement indisponibles : je ne peux pas la certifier.",
     "Le Conseil des Mentors n'a pas pu trouver de source pour la majorité des affirmations suivantes :",
     ...lines,
-    "Réessayez plus tard ou consultez directement les sources officielles (Assemblée nationale, Sénat, Légifrance).",
+    `Réessayez plus tard. ${OFFICIAL_SOURCES_HINT}`,
   ].join("\n");
 }
 
@@ -308,10 +379,11 @@ export async function runPipeline(
   const sources = collectSources(summaries);
   const response =
     status === "answered" ? draft : status === "insufficient" ? buildInsufficientMessage(summaries) : buildRefusalMessage(summaries);
+  const refusalReason = status === "answered" ? undefined : buildRefusalReason(summaries);
 
   await appendSummary(conversationId, { question, profile, status, confidenceScore, response });
 
-  const result: PipelineResult = { conversationId, response, sources, confidenceScore, status, claims, verifications };
+  const result: PipelineResult = { conversationId, response, sources, confidenceScore, status, refusalReason, claims, verifications };
 
   if (isDemoCaptureEnabled() && status === "answered") {
     saveDemoFixture(question, result);

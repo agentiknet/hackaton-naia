@@ -190,6 +190,11 @@
     background: var(--rouge-light);
     border-left: 3px solid var(--rouge);
   }
+  .msg-content .md-h { margin: 12px 0 6px; font-size: 15px; font-weight: 700; color: var(--bleu); }
+  .msg-content .md-h:first-child { margin-top: 0; }
+  .msg-content .md-p { margin: 6px 0; }
+  .msg-content .md-ul { margin: 6px 0; padding-left: 20px; }
+  .msg-content .md-ul li { margin: 3px 0; }
   .msg-sources-inline {
     margin-top: 8px;
     font-size: 12px;
@@ -654,8 +659,8 @@
     <div class="chat-header">
       <h2>Conversation</h2>
       <div class="profile-toggle">
-        <button class="active" data-profile="citoyen">Citoyen</button>
-        <button data-profile="depute">Député</button>
+        <button class="active" data-profile="citoyen" title="Comprendre la loi — explication pédagogique et sourcée">Citoyen · comprendre</button>
+        <button data-profile="depute" title="Travailler la loi — précis technique et aide à la rédaction sourcée">Député · rédiger</button>
       </div>
     </div>
 
@@ -882,7 +887,10 @@ function renderAssistantMessage(data) {
   const el = document.createElement('div');
   const isRefused = data.status === 'refused';
   el.className = `msg msg-assistant${isRefused ? ' refused' : ''}`;
-  el.textContent = data.response;
+  const content = document.createElement('div');
+  content.className = 'msg-content';
+  content.innerHTML = formatMarkdown(data.response || '');
+  el.appendChild(content);
 
   // Inline sources (compact)
   if (data.sources && data.sources.length > 0 && !isRefused) {
@@ -907,7 +915,10 @@ function scrollChat() {
 function renderCertification(data) {
   const body = document.getElementById('certBody');
   const score = data.confidence_score ?? 0;
-  const status = data.status || (score >= 60 ? 'certified' : 'refused');
+  // The API speaks answered|insufficient|refused; the panel speaks
+  // certified|insufficient|refused. Map once, here.
+  const raw = data.status || (score >= 60 ? 'answered' : 'refused');
+  const status = raw === 'answered' ? 'certified' : raw;
   const sources = data.sources || [];
 
   // Gauge color
@@ -928,16 +939,24 @@ function renderCertification(data) {
     ? '<span class="gauge-status refused">Réponse refusée</span>'
     : status === 'certified'
       ? '<span class="gauge-status certified">Certifiée</span>'
-      : '<span class="gauge-status pending">En attente</span>';
+      : status === 'insufficient'
+        ? '<span class="gauge-status pending">Sources insuffisantes</span>'
+        : '<span class="gauge-status pending">En attente</span>';
 
   let html = '';
 
-  // Refused banner
-  if (status === 'refused') {
+  // Non-certified banner (refused or insufficient) — always explains WHY.
+  if (status === 'refused' || status === 'insufficient') {
+    const title = status === 'insufficient'
+      ? '⚠ Non certifiée — sources insuffisantes'
+      : '⚠ Réponse non certifiée — refusée';
+    const fallback = status === 'insufficient'
+      ? 'Les sources officielles nécessaires sont partiellement indisponibles : la majorité des affirmations n\'ont pas pu être vérifiées.'
+      : 'Le Conseil des Mentors n\'a pas pu vérifier suffisamment d\'affirmations contre les sources officielles. Naia refuse de répondre plutôt que de risquer une information inexacte.';
     html += `
       <div class="refused-banner visible">
-        <div class="refused-banner-title">⚠ Réponse non certifiée — refusée</div>
-        <div class="refused-banner-explain">${data.refusal_reason || 'Le Conseil des Mentors n\'a pas pu vérifier suffisamment d\'affirmations contre les sources officielles. Naia refuse de répondre plutôt que de risquer une information inexacte.'}</div>
+        <div class="refused-banner-title">${title}</div>
+        <div class="refused-banner-explain">${escapeHtml(data.refusal_reason || fallback)}</div>
       </div>`;
   }
 
@@ -1041,11 +1060,17 @@ function renderAudit(data) {
     const verdict = v.verdict || 'unknown';
     const verdictClass = 'verdict-' + verdict;
     const verdictLabel = { supported: 'Confirmé', unsupported: 'Réfuté', unknown: 'Non vérifié' }[verdict] || verdict;
-    const claim = v.claim || v.claim_text || v.text || '—';
-    const mentor = v.mentor || v.mentor_type || v.role || '—';
-    const source = v.source || v.citation || v.source_ref || '—';
-    const duration = v.duration_ms != null
-      ? (v.duration_ms < 1000 ? v.duration_ms + ' ms' : (v.duration_ms / 1000).toFixed(1) + ' s')
+    // The API sends claim/source as objects and durationMs (camelCase);
+    // demo/legacy shapes send strings. Normalize both.
+    const claimObj = v.claim ?? v.claim_text ?? v.text;
+    const claim = (claimObj && typeof claimObj === 'object' ? claimObj.text : claimObj) || '—';
+    const mentorRaw = v.mentor || v.mentor_type || v.role || '—';
+    const mentor = { 'mentor-juriste': 'Juriste', 'mentor-parlement': 'Parlement' }[mentorRaw] || mentorRaw;
+    const srcObj = v.source ?? v.citation ?? v.source_ref;
+    const source = (srcObj && typeof srcObj === 'object' ? (srcObj.label || srcObj.ref || srcObj.url) : srcObj) || '—';
+    const ms = v.durationMs ?? v.duration_ms;
+    const duration = ms != null
+      ? (ms < 1000 ? ms + ' ms' : (ms / 1000).toFixed(1) + ' s')
       : (v.duration || '—');
 
     return `
@@ -1079,6 +1104,27 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/* Minimal, safe markdown → HTML for assistant answers. Escapes first, then
+   applies a small subset (headings, bold, bullet lists, paragraphs). No raw
+   HTML from the model ever reaches innerHTML unescaped. */
+function formatMarkdown(str) {
+  const lines = escapeHtml(str).split(/\r?\n/);
+  const out = [];
+  let inList = false;
+  const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+  for (let line of lines) {
+    line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    const h = line.match(/^(#{1,4})\s+(.*)$/);
+    const li = line.match(/^\s*[-*]\s+(.*)$/);
+    if (h) { closeList(); out.push(`<h4 class="md-h">${h[2]}</h4>`); }
+    else if (li) { if (!inList) { out.push('<ul class="md-ul">'); inList = true; } out.push(`<li>${li[1]}</li>`); }
+    else if (line.trim() === '') { closeList(); }
+    else { closeList(); out.push(`<p class="md-p">${line}</p>`); }
+  }
+  closeList();
+  return out.join('');
 }
 
 /* ═══════════════════════════════════════════════
