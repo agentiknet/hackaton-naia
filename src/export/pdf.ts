@@ -257,7 +257,7 @@ function documentShell(title: string, subtitle: string, bodyHtml: string): strin
 </head>
 <body>
   <div class="doc-header">
-    <div class="brand">Naia <span>— assistant parlementaire gouverné</span></div>
+    <div class="brand">Naia <span>— assistant parlementaire</span></div>
     <div class="date">${escapeHtml(formattedDate())}</div>
   </div>
   <div class="doc-subtitle">${escapeHtml(title)} : ${escapeHtml(subtitle)}</div>
