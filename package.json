@@ -11,16 +11,21 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "smoke:mcp": "tsx src/scripts/smoke-mcp.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@ai-sdk/anthropic": "^4.0.7",
+    "@hono/node-server": "^1.13.0",
+    "@mastra/core": "1.48.0",
+    "@mastra/mcp": "^1.13.0",
+    "ai": "^7.0.14",
     "hono": "^4.7.0",
-    "@hono/node-server": "^1.13.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/node": "^22.10.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0",
-    "@types/node": "^22.10.0"
+    "typescript": "^5.7.0"
   }
 }

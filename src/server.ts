@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { mastra } from "./mastra/index.js";
 import type { AuditEntry, Verification } from "./mentors/types.js";
 
 const app = new Hono();
@@ -16,7 +17,10 @@ interface ChatResponseBody {
   confidence_score: number;
 }
 
-app.get("/health", (c) => c.json({ status: "ok" }));
+app.get("/health", (c) => {
+  const agents = Object.keys(mastra.listAgents());
+  return c.json({ status: "ok", agents });
+});
 
 app.post("/api/chat", async (c) => {
   const _body = await c.req.json<ChatRequestBody>();
