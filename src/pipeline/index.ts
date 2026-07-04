@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Agent } from "@mastra/core/agent";
-import { appendSummary, appendVerifications, readAudit } from "../audit/log.js";
+import { appendSummary, appendVerifications, readAudit, resetAudit } from "../audit/log.js";
 import { mentorJuristeAgent } from "../mastra/agents/mentor-juriste/index.js";
 import { mentorParlementAgent } from "../mastra/agents/mentor-parlement/index.js";
 import { naiaAgent } from "../mastra/agents/naia/index.js";
@@ -403,7 +403,13 @@ function saveDemoFixture(question: string, result: PipelineResult): void {
  * (fixed) conversationId — but only write it once, so replaying the same
  * fixture repeatedly doesn't pile up duplicate verification lines. */
 async function ensureDemoAudit(question: string, profile: Profile, fixture: PipelineResult): Promise<void> {
-  if (await readAudit(fixture.conversationId)) return;
+  const existing = await readAudit(fixture.conversationId);
+  // A matching trail (same verification count) means this fixture was already
+  // recorded — skip, so replays stay idempotent. Anything else (missing, or a
+  // stale/foreign trail left over from a prior live run under the same id) is
+  // reset and rewritten from the fixture, the single source of truth.
+  if (existing && existing.verifications.length === fixture.verifications.length) return;
+  if (existing) await resetAudit(fixture.conversationId);
   await appendVerifications(fixture.conversationId, 1, fixture.verifications);
   await appendSummary(fixture.conversationId, {
     question,

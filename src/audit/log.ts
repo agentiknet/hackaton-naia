@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { appendFile, mkdir, readFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import type { Claim, Profile, Verification } from "../mentors/types.js";
 
@@ -100,6 +100,14 @@ export interface AuditTrail {
   confidenceScore: number;
   status?: PipelineStatus;
   createdAt: string;
+}
+
+/** Wipes a conversation's audit log. Used to reset a stale trail (e.g. a demo
+ * fixture's conversationId colliding with a leftover file from an earlier
+ * live run) before re-writing it from scratch. */
+export async function resetAudit(conversationId: string): Promise<void> {
+  const path = auditFilePath(conversationId);
+  if (existsSync(path)) await rm(path);
 }
 
 export async function readAudit(conversationId: string): Promise<AuditTrail | undefined> {
