@@ -1,5 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import type { Tool } from "@mastra/core/tools";
+import { withTimeoutRetry } from "../pipeline/concurrency.js";
 import { isCaptureMode, isMockMode, mockMoulineuseTools, withCapture } from "./mock.js";
 
 const SERVER_NAME = "moulineuse";
@@ -76,6 +77,33 @@ function withOutputCap(tool: MoulineuseTools[string]): MoulineuseTools[string] {
   return marked;
 }
 
+/** Tools tolerant enough that a slow single call is worth retrying once rather
+ * than failing straight to "unknown" — the strict getters (get_recipe,
+ * get_parlement_item, get_pastilled_article) are deliberately excluded: their
+ * failures are almost always a bad/invented id, and retrying a bad id just
+ * wastes the same 15s twice. */
+const RETRYABLE_TOOL_NAMES = new Set(["search_recipes", "search_legal_texts", "query_sql"]);
+
+// Kept well under MENTOR_TIMEOUT_MS (40s) so a single retried call can't alone
+// exhaust a claim's whole budget: worst case here is 2 * 15s = 30s, leaving
+// ~10s of headroom for the rest of that claim's tool calls.
+const TOLERANT_TOOL_TIMEOUT_MS = 15_000;
+
+/** Wraps a tolerant tool so one timeout gets a single retry before the model
+ * ever sees a failure — a lone transient slowness (cold connection, busy
+ * upstream) is common on Moulineuse's live path and shouldn't alone force a
+ * claim to "unknown". Applied innermost, before withOutputCap/withFailSoft. */
+function withToolRetry(name: string, tool: MoulineuseTools[string]): MoulineuseTools[string] {
+  if (!RETRYABLE_TOOL_NAMES.has(name)) return tool;
+  const marked = tool as MoulineuseTools[string] & { __toolRetry?: boolean };
+  const original = marked.execute?.bind(marked);
+  if (!original || marked.__toolRetry) return marked;
+  marked.__toolRetry = true;
+  marked.execute = (inputData: unknown, context: unknown) =>
+    withTimeoutRetry(() => original(inputData, context as never), TOLERANT_TOOL_TIMEOUT_MS);
+  return marked;
+}
+
 /** Tool-specific guidance returned to the model when a live call fails, so it
  * self-corrects instead of dumping a stack trace and burning its step budget.
  * The most common failure is an LLM-invented id passed straight to a getter. */
@@ -125,9 +153,10 @@ export async function resolveMentorTools(toolNames: string[]): Promise<Moulineus
   for (const name of toolNames) {
     const tool = picked[`${SERVER_NAME}_${name}`];
     if (!tool) continue;
-    // Cap first (innermost) so a capture run below still records the
-    // truncated result, then fail-soft outermost so it also catches whatever
-    // truncateResult itself never needs to (it never throws).
+    // Retry innermost (retries the raw call on timeout), then cap the settled
+    // result, then fail-soft outermost catches anything still throwing after
+    // retries — so a capture run below always records the final, capped value.
+    withToolRetry(name, tool);
     withOutputCap(tool);
     withFailSoft(name, tool);
   }

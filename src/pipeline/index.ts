@@ -11,7 +11,9 @@ import { extractClaims } from "./claims.js";
 import { createLimiter, withTimeout } from "./concurrency.js";
 import { verifyClaim } from "./verify.js";
 
-const MENTOR_TIMEOUT_MS = 20_000;
+// Was 20s: live Moulineuse calls (search_recipes in particular) routinely ran
+// past that under load, aborting mid-search and forcing a false "unknown".
+const MENTOR_TIMEOUT_MS = 40_000;
 const MENTOR_CONCURRENCY = 6;
 // Same rationale as the mentors' maxSteps (see pipeline/verify.ts): the mandated
 // search_recipes -> get_recipe -> describe_table -> query_sql strategy routinely
@@ -272,13 +274,33 @@ async function verifyDraft(
   draft: string,
   attempt: number,
   conversationId: string,
+  emit?: StreamEmit,
 ): Promise<{ claims: Claim[]; verifications: Verification[]; summaries: ClaimSummary[]; confidenceScore: number }> {
   const claims = await extractClaims(draft);
+  await emit?.({
+    type: "stage",
+    key: "extract",
+    label: "Extraction des affirmations factuelles à vérifier",
+    count: claims.length,
+  });
+  await emit?.({
+    type: "stage",
+    key: "verify",
+    label: "Le Conseil des Mentors vérifie chaque affirmation contre les sources officielles",
+  });
+
   const deadline = Date.now() + PIPELINE_BUDGET_MS;
   const limit = createLimiter(MENTOR_CONCURRENCY);
 
   const tasks = claims.flatMap((claim) =>
-    MENTORS.map((mentor) => limit(() => verifyClaimWithinBudget(claim, mentor, deadline))),
+    MENTORS.map((mentor) =>
+      limit(async () => {
+        const verification = await verifyClaimWithinBudget(claim, mentor, deadline);
+        // Live progress: each verdict reaches the UI the moment it lands.
+        await emit?.({ type: "verification", verification });
+        return verification;
+      }),
+    ),
   );
 
   const verifications = await Promise.all(tasks);
@@ -366,10 +388,13 @@ function loadDemoFixture(question: string): DemoFixture | undefined {
   if (qTokens.size === 0) return undefined;
   let best: { fixture: DemoFixture; overlap: number } | undefined;
   for (let i = 0; i < files.length; i++) {
-    const fTokens = significantSlugTokens(files[i].replace(/\.json$/, ""));
+    const file = files[i];
+    const fixture = parsed[i];
+    if (!file || !fixture) continue;
+    const fTokens = significantSlugTokens(file.replace(/\.json$/, ""));
     let overlap = 0;
     for (const t of qTokens) if (fTokens.has(t)) overlap++;
-    if (!best || overlap > best.overlap) best = { fixture: parsed[i], overlap };
+    if (!best || overlap > best.overlap) best = { fixture, overlap };
   }
   return best && best.overlap >= 3 ? best.fixture : undefined;
 }
@@ -420,10 +445,53 @@ async function ensureDemoAudit(question: string, profile: Profile, fixture: Pipe
   });
 }
 
+/** Human-readable one-liners for Naia's tool calls, streamed as "thought"
+ * lines while the draft phase works — the 60-90s of silence becomes a
+ * visible research trail (which recipe, which search, which SQL). */
+const TRACE_LABELS: Record<string, string> = {
+  search_recipes: "Recherche de la méthode",
+  get_recipe: "Lecture de la recette",
+  search_legal_texts: "Recherche plein texte LEGI/JORF",
+  get_pastilled_article: "Lecture de l'article pastillé",
+  describe_table: "Inspection du schéma",
+  query_sql: "Requête SQL sur les données parlementaires",
+  query_typesense: "Recherche Typesense",
+  list_parlement_items: "Parcours des documents parlementaires",
+  get_parlement_item: "Lecture d'un document parlementaire",
+};
+
+function describeToolCall(toolName: string, args: unknown): string {
+  const name = toolName.replace(/^moulineuse_/, "");
+  const label = TRACE_LABELS[name] ?? name;
+  const a = (args ?? {}) as Record<string, unknown>;
+  const detail = [a.query, a.id, a.q, a.sql]
+    .find((v): v is string => typeof v === "string" && v.length > 0);
+  const trimmed = detail ? ` — « ${detail.slice(0, 70)}${detail.length > 70 ? "…" : ""} »` : "";
+  return `${label}${trimmed}`;
+}
+
+/** onStepFinish handler that streams each tool call of a generate() loop as a
+ * trace event. Defensive: a malformed step must never break the pipeline. */
+function stepTracer(emit?: StreamEmit) {
+  if (!emit) return undefined;
+  return async (step: { toolCalls?: Array<{ payload?: { toolName?: string; args?: unknown } }> }) => {
+    try {
+      for (const call of step.toolCalls ?? []) {
+        const toolName = call?.payload?.toolName;
+        if (!toolName) continue;
+        await emit({ type: "trace", label: describeToolCall(toolName, call.payload?.args) });
+      }
+    } catch {
+      // tracing is best-effort
+    }
+  };
+}
+
 export async function runPipeline(
   question: string,
   profile: Profile,
   conversationId: string = randomUUID(),
+  emit?: StreamEmit,
 ): Promise<PipelineResult> {
   // Demo mode (replay), outside a capture run: only fixtures answer. Anything
   // unmatched returns an instant honest refusal rather than a ~2-min live call.
@@ -438,18 +506,25 @@ export async function runPipeline(
 
   const threshold = confidenceThreshold();
 
-  const draftResult = await naiaAgent.generate(buildNaiaPrompt(question, profile), { maxSteps: NAIA_MAX_STEPS });
+  const draftResult = await naiaAgent.generate(buildNaiaPrompt(question, profile), {
+    maxSteps: NAIA_MAX_STEPS,
+    onStepFinish: stepTracer(emit),
+  });
   let draft = draftResult.text;
 
-  let { claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 1, conversationId);
+  let { claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 1, conversationId, emit);
   let status = resolveStatus(confidenceScore, unknownRatio(summaries), threshold);
 
   if (status !== "answered") {
+    // Surface the retry instead of a silent 1-2 min re-run: the UI resets its
+    // steps and shows the Conseil demanding a rewrite (attempt 2/2).
+    await emit?.({ type: "stage", key: "retry", label: "Le Conseil demande une reformulation (tentative 2/2)" });
     const retryResult = await naiaAgent.generate(buildRetryPrompt(question, profile, draft, summaries), {
       maxSteps: NAIA_MAX_STEPS,
+      onStepFinish: stepTracer(emit),
     });
     draft = retryResult.text;
-    ({ claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 2, conversationId));
+    ({ claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 2, conversationId, emit));
     status = resolveStatus(confidenceScore, unknownRatio(summaries), threshold);
   }
 
@@ -477,8 +552,9 @@ export async function runPipeline(
 
 export type StreamEvent =
   | { type: "stage"; key: string; label: string; count?: number }
+  | { type: "trace"; label: string }
   | { type: "verification"; verification: Verification }
-  | { type: "done"; result: PipelineResult };
+  | { type: "done"; result: PipelineResult | DraftResult };
 
 type StreamEmit = (event: StreamEvent) => void | Promise<void>;
 
@@ -501,10 +577,10 @@ export async function runPipelineStreaming(
     return miss;
   }
 
-  // Live path: coarse stage markers around the real pipeline.
+  // Live path: emit flows through the real pipeline — stages, per-claim
+  // verifications and the retry are streamed as they actually happen.
   await emit({ type: "stage", key: "draft", label: "Naia rédige une réponse à partir des sources officielles…" });
-  const result = await runPipeline(question, profile, conversationId);
-  for (const v of result.verifications) await emit({ type: "verification", verification: v });
+  const result = await runPipeline(question, profile, conversationId, emit);
   await emit({ type: "stage", key: "certify", label: "Arbitrage et certification…" });
   await emit({ type: "done", result });
   return result;
@@ -600,6 +676,13 @@ function buildDraftPrompt(intent: string, baseText?: string): string {
     `Intention : ${intent}`,
     baseText ? `\nTexte de base à amender :\n"""\n${baseText}\n"""` : "",
     "",
+    "RÈGLE ABSOLUE : produis TOUJOURS un premier jet complet, même si l'intention est brève,",
+    "vague ou mal orthographiée. Interprète-la de façon raisonnable, choisis le véhicule juridique",
+    "le plus plausible (code, loi existante) via tes outils, et note explicitement tes hypothèses",
+    "d'interprétation dans l'exposé sommaire. Ne demande JAMAIS de précisions, ne renvoie JAMAIS",
+    "une réponse vide : un premier jet imparfait que le Conseil peut vérifier vaut toujours mieux",
+    "que pas de texte.",
+    "",
     "Produis exactement deux sections en Markdown :",
     "## Dispositif",
     "La rédaction normative précise (article, alinéas numérotés). Formulation juridique, impérative.",
@@ -609,6 +692,38 @@ function buildDraftPrompt(intent: string, baseText?: string): string {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+/** Feedback loop for the drafting workspace — mirrors buildRetryPrompt but the
+ * deliverable stays a legislative text (dispositif + exposé sommaire). */
+function buildDraftRetryPrompt(intent: string, draft: string, summaries: ClaimSummary[]): string {
+  const feedback = summaries
+    .map((s) => {
+      const verdicts = s.verifications
+        .map((v) => `${v.mentor}: ${v.verdict}${v.source ? ` (source: ${v.source.label})` : ""}`)
+        .join("; ");
+      return `- Référence : "${s.claim.text}" → ${verdicts}`;
+    })
+    .join("\n");
+
+  return [
+    profileFraming("depute"),
+    "",
+    `Intention : ${intent}`,
+    "",
+    "Ton premier projet de rédaction était :",
+    '"""',
+    draft,
+    '"""',
+    "",
+    "Le Conseil des Mentors a vérifié chaque référence avec ce résultat :",
+    feedback,
+    "",
+    "Reformule le texte législatif (mêmes deux sections ## Dispositif / ## Exposé sommaire) :",
+    'conserve les références "supported", corrige ou retire les références "unsupported",',
+    'remplace les références "unknown" par des références que tu peux vérifier via tes outils.',
+    "Produis TOUJOURS un texte complet, jamais une réponse vide.",
+  ].join("\n");
 }
 
 function buildSuggestionsPrompt(intent: string, draft: string): string {
@@ -640,6 +755,7 @@ export async function runDraft(
   intent: string,
   baseText?: string,
   conversationId: string = randomUUID(),
+  emit?: StreamEmit,
 ): Promise<DraftResult> {
   if (isDemoReplayEnabled()) {
     const fixture = loadDraftFixture(intent);
@@ -661,21 +777,68 @@ export async function runDraft(
 
   const threshold = confidenceThreshold();
 
-  const draftGen = await naiaAgent.generate(buildDraftPrompt(intent, baseText), { maxSteps: NAIA_MAX_STEPS });
-  const draft = draftGen.text;
+  const draftGen = await naiaAgent.generate(buildDraftPrompt(intent, baseText), {
+    maxSteps: NAIA_MAX_STEPS,
+    onStepFinish: stepTracer(emit),
+  });
+  let draft = draftGen.text;
 
-  const { claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 1, conversationId);
-  const status = resolveStatus(confidenceScore, unknownRatio(summaries), threshold);
+  // Empty-draft guard: the model occasionally answers with nothing (or a
+  // clarification request stripped to nothing). One firm re-ask; if still
+  // empty, fail fast with an actionable reason — never send an empty text
+  // to the mentors, their feedback on "" is useless noise.
+  if (!draft.trim()) {
+    const reAsk = await naiaAgent.generate(
+      `${buildDraftPrompt(intent, baseText)}\n\nTa réponse précédente était VIDE. C'est inacceptable : produis maintenant le premier jet complet (## Dispositif + ## Exposé sommaire).`,
+      { maxSteps: NAIA_MAX_STEPS, onStepFinish: stepTracer(emit) },
+    );
+    draft = reAsk.text;
+  }
+  if (!draft.trim()) {
+    const refusalReason =
+      "Naia n'a pas réussi à produire une rédaction pour cette intention. Reformulez-la en une phrase d'objectif (même brève), par exemple : « renforcer la coopération commerciale avec l'Asie via les accords bilatéraux ».";
+    await appendSummary(conversationId, { question: intent, profile: "depute", status: "refused", confidenceScore: 0, response: "" });
+    return {
+      conversationId, intent, draft: "", sources: [], confidenceScore: 0,
+      status: "refused", refusalReason, suggestions: [], claims: [], verifications: [],
+    };
+  }
+
+  let { claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 1, conversationId, emit);
+  let status = resolveStatus(confidenceScore, unknownRatio(summaries), threshold);
+
+  // Same trust loop as the Q&A pipeline: a first draft that fails
+  // certification gets one rewrite informed by the mentors' verdicts.
+  if (status !== "answered") {
+    await emit?.({ type: "stage", key: "retry", label: "Le Conseil demande une reformulation (tentative 2/2)" });
+    const retryGen = await naiaAgent.generate(buildDraftRetryPrompt(intent, draft, summaries), {
+      maxSteps: NAIA_MAX_STEPS,
+      onStepFinish: stepTracer(emit),
+    });
+    if (retryGen.text.trim()) {
+      draft = retryGen.text;
+      ({ claims, verifications, summaries, confidenceScore } = await verifyDraft(draft, 2, conversationId, emit));
+      status = resolveStatus(confidenceScore, unknownRatio(summaries), threshold);
+    }
+  }
 
   // Council suggestions run regardless of verdict — even a draft that can't be
   // certified benefits from concrete legistic feedback the député can act on.
+  await emit?.({ type: "stage", key: "suggest", label: "Le Conseil formule ses suggestions légistiques…" });
   const suggestionsGen = await mentorJuristeAgent.generate(buildSuggestionsPrompt(intent, draft), {
     maxSteps: NAIA_MAX_STEPS,
+    onStepFinish: stepTracer(emit),
   });
   const suggestions = parseSuggestions(suggestionsGen.text);
 
   const sources = collectSources(summaries);
-  const refusalReason = status === "answered" ? undefined : buildRefusalReason(summaries);
+  // Draft-specific wording for the empty-claims case: the claims come from the
+  // produced text, not from the user's "question".
+  const refusalReason = status === "answered"
+    ? undefined
+    : summaries.length === 0
+      ? "La rédaction produite ne contient aucune référence légale vérifiable : le Conseil ne peut pas la certifier. Précisez l'intention (texte ou code visé) pour ancrer la rédaction dans le droit existant."
+      : buildRefusalReason(summaries);
 
   await appendSummary(conversationId, {
     question: intent,
@@ -702,5 +865,21 @@ export async function runDraft(
     saveDraftFixture(intent, result);
   }
 
+  return result;
+}
+
+/** Streaming variant of runDraft — same event grammar as the chat stream
+ * (stage / trace / verification / done) so the drafting workspace can show
+ * the pipeline working instead of a mute button. */
+export async function runDraftStreaming(
+  intent: string,
+  baseText: string | undefined,
+  conversationId: string,
+  emit: StreamEmit,
+): Promise<DraftResult> {
+  await emit({ type: "stage", key: "draft", label: "Naia rédige le dispositif et l'exposé sommaire…" });
+  const result = await runDraft(intent, baseText, conversationId, emit);
+  await emit({ type: "stage", key: "certify", label: "Arbitrage et certification…" });
+  await emit({ type: "done", result });
   return result;
 }

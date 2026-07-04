@@ -38,3 +38,18 @@ export async function withTimeout<T>(fn: (signal: AbortSignal) => Promise<T>, ms
     clearTimeout(timer);
   }
 }
+
+/** Runs `fn` under a timeout and retries exactly once if that attempt times
+ * out — a single transient slowness (a busy upstream, a cold connection)
+ * shouldn't alone force a claim to "unknown". Non-timeout errors propagate
+ * immediately, unretried: a retry only helps when the failure was "too slow",
+ * not when it was structurally wrong. */
+export async function withTimeoutRetry<T>(fn: (signal: AbortSignal) => Promise<T>, ms: number): Promise<T> {
+  try {
+    return await withTimeout(fn, ms);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.startsWith("timeout after")) throw error;
+    return withTimeout(fn, ms);
+  }
+}
