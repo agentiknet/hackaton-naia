@@ -788,9 +788,13 @@ export async function runDraft(
   // empty, fail fast with an actionable reason — never send an empty text
   // to the mentors, their feedback on "" is useless noise.
   if (!draft.trim()) {
+    // The usual cause: a vague intent sends the model wandering through tools
+    // until maxSteps runs out without ever writing. The re-ask therefore CUTS
+    // tools entirely — write the first draft from general knowledge, and let
+    // the Conseil do its job: verifying is the mentors' role, not the drafter's.
     const reAsk = await naiaAgent.generate(
-      `${buildDraftPrompt(intent, baseText)}\n\nTa réponse précédente était VIDE. C'est inacceptable : produis maintenant le premier jet complet (## Dispositif + ## Exposé sommaire).`,
-      { maxSteps: NAIA_MAX_STEPS, onStepFinish: stepTracer(emit) },
+      `${buildDraftPrompt(intent, baseText)}\n\nTa tentative précédente s'est épuisée en recherches sans produire de texte. Cette fois : NE fais AUCUNE recherche, rédige immédiatement le premier jet complet (## Dispositif + ## Exposé sommaire) à partir de tes connaissances. Signale dans l'exposé sommaire les références à faire vérifier par le Conseil.`,
+      { maxSteps: 2, toolChoice: "none", onStepFinish: stepTracer(emit) },
     );
     draft = reAsk.text;
   }

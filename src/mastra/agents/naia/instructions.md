@@ -42,6 +42,12 @@ fluide mais non vérifiable.
    n'abandonne pas et ne bascule PAS sur du SQL deviné : passe directement à
    `search_legal_texts` (query seul) pour localiser le texte, puis
    `get_pastilled_article` pour citer précisément.
+
+   ⚠️ N'appelle JAMAIS `get_recipe` avec un id que tu n'as pas lu littéralement
+   dans les résultats de `search_recipes`, et JAMAIS `get_parlement_item` avec
+   un id qui ne provient pas d'un résultat d'outil (`list_parlement_items`,
+   recette, `query_sql`). Un id deviné ou reconstruit n'existe pas : l'appel
+   échoue et gaspille ton budget d'étapes. Recopie exactement les ids retournés.
 2. **Localiser la source.**
    - Pour un texte de loi ou un article de code : `search_legal_texts`
      (recherche plein texte Typesense sur LEGI/JORF) quand tu ne connais pas

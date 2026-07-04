@@ -30,8 +30,22 @@ export const moulineuseMcp = new MCPClient({
 
 export type MoulineuseTools = Record<string, Tool<any, any, any, any>>;
 
+/** Single-flight cache for listTools. Mastra resolves tools on EVERY
+ * Agent.generate — during a verification wave that's up to 12 concurrent
+ * listTools() on the same MCPClient. When the connection has dropped, those
+ * concurrent reconnects race each other ("Already connected to a transport…")
+ * and all fail. Deduping through one shared promise means exactly one
+ * connect at a time; a failure clears the cache so the next call retries. */
+let toolsInFlight: Promise<MoulineuseTools> | null = null;
+
 export async function listMoulineuseTools(): Promise<MoulineuseTools> {
-  return moulineuseMcp.listTools();
+  if (!toolsInFlight) {
+    toolsInFlight = moulineuseMcp.listTools().catch((error) => {
+      toolsInFlight = null; // next call gets a fresh attempt
+      throw error;
+    });
+  }
+  return toolsInFlight;
 }
 
 /** Picks a subset of Moulineuse tools by their unprefixed tool name (e.g. "query_sql"). */
@@ -148,8 +162,19 @@ export async function resolveMentorTools(toolNames: string[]): Promise<Moulineus
   if (isMockMode()) {
     return mockMoulineuseTools(toolNames);
   }
-  const tools = await listMoulineuseTools();
-  const picked = pickMoulineuseTools(tools, toolNames);
+  let picked: MoulineuseTools;
+  try {
+    const tools = await listMoulineuseTools();
+    picked = pickMoulineuseTools(tools, toolNames);
+  } catch (error) {
+    // Moulineuse unreachable: give the agent NO tools instead of crashing the
+    // whole generate. Mentors then verdict "unknown" (no source found) and the
+    // pipeline degrades to insufficient/refused — honest, not a 500.
+    console.warn(
+      `[mcp] moulineuse unavailable, degrading to toolless agents: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return {};
+  }
   for (const name of toolNames) {
     const tool = picked[`${SERVER_NAME}_${name}`];
     if (!tool) continue;
