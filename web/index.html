@@ -2008,9 +2008,18 @@ function exportActiveAnswer() {
   const t = turns[activeTurnIdx];
   if (!t) { toast('warn', 'Aucune réponse à exporter.'); return; }
   const d = t.data;
+  // Defensive: export exactly what's on screen. `d.response` is the
+  // structured PipelineResult text (covers the normal path, refusals
+  // included — a refused answer's `response` is the refusal message).
+  // Fall back to the rendered message's own text so the PDF can never end
+  // up blank while the chat bubble above it isn't.
+  const responseText = (d.response && d.response.trim())
+    ? d.response
+    : ((t.contentEl && t.contentEl.innerText) || '').trim();
+  if (!responseText) { toast('warn', 'Cette réponse est vide — rien à exporter.'); return; }
   exportPdf('/api/export/answer', {
     question: t.question,
-    response: d.response || '',
+    response: responseText,
     sources: d.sources || [],
     claims: d.claims || [],
     verifications: d.verifications || [],
