@@ -86,9 +86,10 @@ Format : 11 slides, une idée par slide. TITRE + bullets + note orateur.
 
 **TITRE : La démo — en direct, sur de vraies sources**
 
-- **Comprendre** : « le cannabis est-il autorisé pour certains patients ? », « la loi euthanasie ? » → réponses certifiées, sourcées sur les décrets et lois réels ; le pipeline défile à l'écran.
+- **Comprendre** : « la loi énergie ? », « la loi euthanasie ? », « l'encadrement des loyers est-il obligatoire partout ? » → réponses certifiées, sourcées sur les lois et décrets réels ; le pipeline défile à l'écran.
 - **Rédiger** : une intention d'amendement → dispositif + exposé + suggestions du Conseil, certifiés.
 - **Refus assumé** : une question piège ou hors-source → refus **instantané et motivé**, audit affiché en direct.
+- **Contrôler** : « le 49.3 sur le budget 2026 a-t-il renversé le gouvernement ? » → scrutin réel, motion de censure rejetée (260 voix, seuil requis 289), sourcé sur les actes de l'Assemblée.
 - **Filet de sécurité** : réseau coupé en plein pitch → bascule automatique en mode démo (fixtures), la démo continue sans coupure.
 
 **Note orateur :** « Regardez le Conseil vérifier chaque phrase en direct — et sur une question piège, refuser, avec l'audit qui le prouve. »
@@ -112,7 +113,7 @@ Format : 11 slides, une idée par slide. TITRE + bullets + note orateur.
 
 **TITRE : C'est debout, en direct, sur de vraies sources**
 
-- Plusieurs sujets réels déjà couverts, sourcés sur les textes officiels : énergie (art. L.100-4), fin de vie (loi Claeys-Leonetti), cannabis médical (décrets d'expérimentation).
+- Plusieurs sujets réels déjà couverts, sourcés sur les textes officiels : énergie (art. L.100-4), fin de vie (loi Claeys-Leonetti), encadrement des loyers (loi ELAN) — plus un cas de contrôle parlementaire (PLF 2026, 49.3, motion de censure rejetée).
 - Le pipeline (rédaction → extraction de claims → vérification parallèle → arbitrage) est du code qui tourne, pas un schéma en slide.
 - Le refus sur la question piège n'est pas scripté dans une démo vidéo : c'est le Conseil des Mentors qui le décide, en direct.
 - Construit et calibré en une session hackathon — la fondation tient.
