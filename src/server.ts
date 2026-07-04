@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { readAudit } from "./audit/log.js";
 import { mastra } from "./mastra/index.js";
@@ -66,6 +67,8 @@ app.get("/api/audit/:conversationId", async (c) => {
 
   return c.json(audit);
 });
+
+app.use("*", serveStatic({ root: "./web" }));
 
 const port = Number(process.env.PORT ?? 3000);
 
