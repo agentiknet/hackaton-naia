@@ -1,4 +1,7 @@
 packages:
   - "."
 allowBuilds:
+  canvas: false
   esbuild: true
+overrides:
+  "@canvakit/core": "file:../../canvakit/packages/core"

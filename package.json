@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.7",
+    "@canvakit/core": "file:../../canvakit/packages/core",
+    "@canvakit/export": "file:../../canvakit/packages/export",
     "@hono/node-server": "^1.13.0",
     "@mastra/core": "1.48.0",
     "@mastra/mcp": "^1.13.0",

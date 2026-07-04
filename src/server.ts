@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
@@ -66,6 +68,23 @@ app.get("/api/audit/:conversationId", async (c) => {
   }
 
   return c.json(audit);
+});
+
+const EXPORTS_DIR = join(process.cwd(), "exports");
+const EXPORT_FILENAME_RE = /^[a-zA-Z0-9._-]+\.html$/;
+
+app.get("/exports/:file", async (c) => {
+  const file = c.req.param("file");
+  if (!EXPORT_FILENAME_RE.test(file)) {
+    return c.json({ error: "invalid filename" }, 400);
+  }
+
+  try {
+    const html = await readFile(join(EXPORTS_DIR, file), "utf-8");
+    return c.html(html);
+  } catch {
+    return c.json({ error: "not found" }, 404);
+  }
 });
 
 app.use("*", serveStatic({ root: "./web" }));
